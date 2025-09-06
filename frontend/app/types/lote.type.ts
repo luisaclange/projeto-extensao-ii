@@ -3,4 +3,5 @@ export interface ILote {
     titulo: string;
     data_inicio: string;
     data_fim: string;
+    favorito: boolean;
 }

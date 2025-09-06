@@ -1,41 +1,10 @@
 {
   "lotes": [
     {
-      "id": "1",
-      "titulo": "Lote 1",
-      "data_inicio": "21/07",
-      "data_fim": "30/07"
-    },
-    {
-      "id": "0cf5",
-      "titulo": "Teste",
-      "data_inicio": "01/08",
-      "data_fim": "13/08"
+      "id": "b14e",
+      "titulo": "Lote 1"
     }
   ],
-  "pedidos": [
-    {
-      "id": "1",
-      "loteId": "1",
-      "cliente": "Amanda",
-      "items": [
-        {
-          "id": "1",
-          "pedidoId": "1",
-          "produtoId": "1",
-          "qtde": 3
-        },
-        {
-          "produtoId": "1",
-          "qtde": "2"
-        }
-      ]
-    }
-  ],
-  "produtos": [
-    {
-      "id": "1",
-      "nome": "Bolacha pintada editada"
-    }
-  ]
+  "pedidos": [],
+  "produtos": []
 }

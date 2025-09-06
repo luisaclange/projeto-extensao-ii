@@ -1,15 +1,32 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 html,
 body {
-  @apply bg-white dark:bg-amber-50;
+  @apply bg-[#1a1216];
+  color-scheme: dark;
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: light;
-  }
+.divider-appbar {
+  height: 2px;
+  background: linear-gradient(to right,#1a1216, #d7586d, #1a1216);
+  width: 100vw;
+}
+
+h2 {
+  font-weight: bold;
+  font-size: 24px;
+  color: #eed0d5;
+  font-weight: bolder;
+}
+
+h3 {
+  font-weight: bold;
+  font-size: 20px;
+  color: #eed0d5;
+  font-weight: bolder;
 }
