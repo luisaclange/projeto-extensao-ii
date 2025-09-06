@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import produtosController from "../controllers/produtos.controller";
 
 const router: Router = Router();

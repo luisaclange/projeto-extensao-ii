@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import lotesController from "../controllers/lotes.controller";
 
 const router: Router = Router();

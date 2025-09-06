@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
-import Lote, { ILote } from "../models/Lote";
+import Pedido, { IPedido } from "../models/Pedido";
 
-const lotesController = {
+const pedidosController = {
     async create (req: Request, res: Response): Promise<void> {
         try {
-            const lote: ILote = new Lote(req.body);
-            await lote.save();
+            const pedido: IPedido = new Pedido(req.body);
+            await pedido.save();
 
-            res.status(201).json(lote);
+            res.status(201).json(pedido);
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }
@@ -16,11 +16,11 @@ const lotesController = {
 
     async update (req: Request, res: Response): Promise<void> {
         try {
-            const lote = await Lote.findByIdAndUpdate(req.params.id, req.body, {
+            const pedido = await Pedido.findByIdAndUpdate(req.params.id, req.body, {
                 new: true,
             });
 
-            res.json(lote);
+            res.json(pedido);
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }
@@ -28,9 +28,9 @@ const lotesController = {
 
     async delete (req: Request, res: Response): Promise<void> {
         try {
-            await Lote.findByIdAndDelete(req.params.id);
+            await Pedido.findByIdAndDelete(req.params.id);
 
-            res.json({ message: "Lote deletado com sucesso" });
+            res.json({ message: "Pedido deletado com sucesso" });
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }
@@ -39,9 +39,9 @@ const lotesController = {
     async getAll (req: Request, res: Response): Promise<void> {
         try {
             const filters = req.query;
-            const lotes: ILote[] = await Lote.find(filters);
+            const pedidos: IPedido[] = await Pedido.find(filters);
 
-            res.json(lotes);
+            res.json(pedidos);
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }
@@ -49,13 +49,13 @@ const lotesController = {
 
     async getOne (req: Request, res: Response): Promise<void> {
         try {
-            const lote = await Lote.findById(req.params.id);
+            const pedido = await Pedido.findById(req.params.id);
 
-            res.json(lote);
+            res.json(pedido);
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }
     },
 }
 
-export default lotesController;
+export default pedidosController;
