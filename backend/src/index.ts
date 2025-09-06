@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 
 import lotesRoutes from "./routes/lotes.routes";
+import produtosRoutes from "./routes/produtos.routes";
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ mongoose
 
 // Rotas
 app.use("/api/lotes", lotesRoutes);
+app.use("/api/produtos", produtosRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
