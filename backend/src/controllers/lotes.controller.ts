@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Lote, { ILote } from "../models/Lote";
+import Pedido from "../models/Pedido";
 
 const lotesController = {
     async create (req: Request, res: Response): Promise<void> {
@@ -20,7 +21,9 @@ const lotesController = {
                 new: true,
             });
 
-            res.json(lote);
+            if (lote)
+                res.json(lote);
+            else res.status(404).json({ error: "Lote não encontrado" })        
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }
@@ -28,9 +31,13 @@ const lotesController = {
 
     async delete (req: Request, res: Response): Promise<void> {
         try {
-            await Lote.findByIdAndDelete(req.params.id);
+            const lote = await Lote.findByIdAndDelete(req.params.id);
 
-            res.json({ message: "Lote deletado com sucesso" });
+            if (lote) { 
+                await Pedido.deleteMany({ loteId: req.params.id });
+                res.json({ message: "Lote deletado com sucesso" });
+            }
+            else res.status(404).json({ error: "Lote não encontrado" })
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }
@@ -50,8 +57,19 @@ const lotesController = {
     async getOne (req: Request, res: Response): Promise<void> {
         try {
             const lote = await Lote.findById(req.params.id);
+            
+            if (lote) {
+                const pedidos = await Pedido.find({
+                    loteId: req.params.id
+                });
 
-            res.json(lote);
+                res.json({
+                    ...lote?.toJSON(),
+                    pedidos
+                });
+            }
+
+            else res.status(404).json({ error: "Lote não encontrado" })
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }

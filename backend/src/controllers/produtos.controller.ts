@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Produto, { IProduto } from "../models/Produto";
+import Pedido from "../models/Pedido";
 
 const produtosController = {
     async create (req: Request, res: Response): Promise<void> {
@@ -20,7 +21,9 @@ const produtosController = {
                 new: true,
             });
 
-            res.json(produto);
+            if (produto)
+                res.json(produto);
+            else res.status(404).json({ error: "Produto não encontrado" })
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }
@@ -28,9 +31,17 @@ const produtosController = {
 
     async delete (req: Request, res: Response): Promise<void> {
         try {
-            await Produto.findByIdAndDelete(req.params.id);
+            const produto = await Produto.findByIdAndDelete(req.params.id);
 
-            res.json({ message: "Produto deletado com sucesso" });
+            if (produto) {
+                await Pedido.updateMany(
+                    {},
+                    { $pull: { items: { produtoId: req.params.id }}}
+                );
+                
+                res.json({ message: "Produto deletado com sucesso" });
+            }
+            else res.status(404).json({ error: "Produto não encontrado" })
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }
@@ -51,7 +62,9 @@ const produtosController = {
         try {
             const produto = await Produto.findById(req.params.id);
 
-            res.json(produto);
+            if (produto)
+                res.json(produto);
+            else res.status(404).json({ error: "Produto não encontrado" })
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }
