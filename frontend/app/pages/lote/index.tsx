@@ -47,7 +47,7 @@ export function LotePage() {
         produto: produto.nome,
         qtde: dataPedidos.reduce((count: number, pedido) => {
           pedido.items.forEach((item) => {
-            if (item.produtoId == produto.id) {
+            if (item.produtoId == produto._id) {
               count += Number(item.qtde);
             }
           });
@@ -155,7 +155,7 @@ export function LotePage() {
                       </div>
 
                       <div>
-                        <Button onClick={() => handleRedirectPedido(item.id)}>
+                        <Button onClick={() => handleRedirectPedido(item._id)}>
                           Editar
                         </Button>
                       </div>

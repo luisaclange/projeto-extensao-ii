@@ -110,7 +110,7 @@ export function PedidoPage() {
                   }
                 >
                   {produtos.map((prod) => (
-                    <MenuItem value={prod.id}>{prod.nome}</MenuItem>
+                    <MenuItem value={prod._id}>{prod.nome}</MenuItem>
                   ))}
                 </Select>
                 <TextField

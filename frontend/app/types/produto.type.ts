@@ -1,4 +1,4 @@
 export interface IProduto {
-    id: string;
+    _id: string;
     nome: string;
 }

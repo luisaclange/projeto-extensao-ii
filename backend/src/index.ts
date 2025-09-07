@@ -1,6 +1,7 @@
 import express, { Application } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cors from "cors";
 
 import lotesRoutes from "./routes/lotes.routes";
 import produtosRoutes from "./routes/produtos.routes";
@@ -12,6 +13,11 @@ const app: Application = express();
 
 // Middleware
 app.use(express.json());
+
+app.use(cors({
+  origin: "http://localhost:5173" // libera só o frontend local
+  // origin: "*" // (cuidado) libera para qualquer origem
+}));
 
 // Conexão MongoDB
 mongoose

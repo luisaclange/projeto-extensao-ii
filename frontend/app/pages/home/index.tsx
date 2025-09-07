@@ -1,49 +1,31 @@
-import {
-  CalendarMonth,
-  Delete,
-  Edit,
-  Favorite,
-  FavoriteBorder,
-} from "@mui/icons-material";
-import {
-  Button,
-  Card,
-  CardContent,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Grid,
-  TextField,
-} from "@mui/material";
+import { Container, Grid } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import api from "~/services/axios";
 import type { ILote } from "~/types/lote.type";
 import type { IProduto } from "~/types/produto.type";
+import { CardLote } from "~/components/CardLote";
+import { CardProduto } from "~/components/CardProduto";
+import { DialogNovoLote } from "~/components/DialogNovoLote";
+import { CardNew } from "~/components/CardNew";
+import { LoaderPage } from "~/components/LoaderPage";
+
+export interface IResLote extends ILote {
+  createdAt?: string | number | Date;
+  numeroPedidos?: number;
+  numeroItems?: number;
+}
 
 export function HomePage() {
-  const [lotes, setLotes] = useState<ILote[]>([]);
+  const [lotes, setLotes] = useState<IResLote[]>([]);
   const [produtos, setProdutos] = useState<IProduto[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isOpenDialogNewLote, setIsOpenDialogNewLote] = useState(false);
-  const [newLote, setNewLote] = useState<Partial<ILote>>();
 
   const navigate = useNavigate();
 
-  const handleRedirectLote = (id?: string) => {
-    navigate(`/lote${id ? `?id=${id}` : ""}`);
-  };
-
   const handleRedirectProduto = (id?: string) => {
     navigate(`/produto${id ? `?id=${id}` : ""}`);
-  };
-
-  const handleCreateLote = async () => {
-    const response = await api.post("/lotes", newLote);
-    navigate(`/lote?id=${response.data?.id}`);
   };
 
   useEffect(() => {
@@ -61,68 +43,41 @@ export function HomePage() {
 
   return (
     <section>
-      <Container maxWidth="lg" className="mt-4">
+      <Container maxWidth="lg" className="my-4">
         {isLoading ? (
-          <span>Carregando</span>
+          <LoaderPage />
         ) : (
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-4">
               <h2>Lotes</h2>
 
               <Grid container spacing={4}>
-                {lotes.map((item) => (
-                  <Grid size={4} key={item.id}>
-                    <Card className="border-2 border-[#eed0d5]">
-                      <CardContent className="p-4 flex flex-row justify-between gap-4">
-                        <div className="flex flex-col gap-4">
-                          <h3>{item.titulo}</h3>
-                          {!!item.data_fim && !!item.data_inicio ? (
-                            <p className="text-pink-50 text-sm">
-                              <CalendarMonth className="mr-2" />
-                              <b>
-                                {item.data_inicio} à {item.data_fim}
-                              </b>
-                            </p>
-                          ) : (
-                            ""
-                          )}
-                        </div>
-                        <div className="flex flex-col justify-end gap-2">
-                          <Button
-                            color="success"
-                            onClick={() => handleRedirectLote(item.id)}
-                          >
-                            {item.favorito ? <Favorite /> : <FavoriteBorder />}
-                          </Button>
-
-                          <Button
-                            color="info"
-                            onClick={() => handleRedirectLote(item.id)}
-                          >
-                            <Edit />
-                          </Button>
-
-                          <Button
-                            color="error"
-                            onClick={() => handleRedirectLote(item.id)}
-                          >
-                            <Delete />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
+                {lotes
+                  .sort(
+                    (a, b) =>
+                      new Date(a.createdAt!).getTime() -
+                      new Date(b.createdAt!).getTime()
+                  )
+                  .sort((a, b) => Number(b.favorito) - Number(a.favorito))
+                  .map((item) => (
+                    <Grid size={4} key={item._id}>
+                      <CardLote
+                        item={item}
+                        setItem={(value: Partial<ILote>) => {
+                          setLotes(
+                            lotes.map((lote) =>
+                              lote._id == item._id
+                                ? { ...item, ...value }
+                                : lote
+                            )
+                          );
+                        }}
+                      />
+                    </Grid>
+                  ))}
 
                 <Grid size={4}>
-                  <Card
-                    className="border-2 border-[#eed0d5] border-dotted h-full"
-                    onClick={() => setIsOpenDialogNewLote(true)}
-                  >
-                    <CardContent className="flex justify-center items-center h-full">
-                      <span className="text-9xl text-[#d7586d]">+</span>
-                    </CardContent>
-                  </Card>
+                  <CardNew handleClick={() => setIsOpenDialogNewLote(true)} />
                 </Grid>
               </Grid>
             </div>
@@ -133,33 +88,15 @@ export function HomePage() {
               <Grid container spacing={4}>
                 {produtos.map((item) => (
                   <Grid size={4}>
-                    <Card>
-                      <CardContent className="p-4 flex justify-between">
-                        <div className="flex flex-col">
-                          <p>{item.nome}</p>
-                        </div>
-                        <div>
-                          <Button
-                            variant="contained"
-                            onClick={() => handleRedirectProduto(item.id)}
-                          >
-                            Editar
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <CardProduto item={item} />
                   </Grid>
                 ))}
 
                 <Grid size={4}>
-                  <Card
-                    className="border-2 border-[#eed0d5] border-dotted h-full"
-                    onClick={() => handleRedirectProduto()}
-                  >
-                    <CardContent className="flex justify-center items-center h-full">
-                      <span className="text-9xl text-[#d7586d]">+</span>
-                    </CardContent>
-                  </Card>
+                  <CardNew
+                    handleClick={() => handleRedirectProduto()}
+                    size="16"
+                  />
                 </Grid>
               </Grid>
             </div>
@@ -167,36 +104,10 @@ export function HomePage() {
         )}
       </Container>
 
-      <Dialog
-        open={isOpenDialogNewLote}
-        onClose={() => setIsOpenDialogNewLote(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle id="alert-dialog-title">
-          <b>Novo lote</b>
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description" className="py-4">
-            <TextField
-              label="Titulo"
-              value={newLote?.titulo}
-              className="w-full"
-              onChange={(e) => setNewLote({ titulo: e.target.value })}
-            />
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsOpenDialogNewLote(false)}>
-            Cancelar
-          </Button>
-          <Button variant="contained" onClick={handleCreateLote} autoFocus>
-            Criar
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <DialogNovoLote
+        isOpen={isOpenDialogNewLote}
+        setIsOpen={setIsOpenDialogNewLote}
+      />
     </section>
   );
 }
