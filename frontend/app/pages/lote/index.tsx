@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { CardNew } from "~/components/CardNew";
 import { CardPedido } from "~/components/CardPedido";
+import { LoaderPage } from "~/components/LoaderPage";
 import api from "~/services/axios";
 import type { ILote } from "~/types/lote.type";
 import type { IPedido } from "~/types/pedido.type";
@@ -112,7 +113,7 @@ export function LotePage() {
     <section>
       <Container maxWidth="lg" className="mt-4">
         {isLoading ? (
-          <span>Carregando...</span>
+          <LoaderPage />
         ) : (
           <div>
             <div className="flex flex-row justify-between items-center">
