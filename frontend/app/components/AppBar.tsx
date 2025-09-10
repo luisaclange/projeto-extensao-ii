@@ -1,4 +1,4 @@
-import { Container, Divider } from "@mui/material";
+import { Container } from "@mui/material";
 import logo from "../assets/logo.png";
 
 export const AppBar = () => {

@@ -20,12 +20,18 @@ export function DialogNovoLote({
   setIsOpen: (value: boolean) => void;
 }) {
   const [newLote, setNewLote] = useState<Partial<ILote>>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleCreateLote = async () => {
-    const response = await api.post("/lotes", newLote);
-    navigate(`/lote?id=${response.data?._id}`);
+    try {
+      setIsLoading(true);
+      const response = await api.post("/lotes", newLote);
+      navigate(`/lote?id=${response.data?._id}&edit=true`);
+    } catch (error) {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,7 +58,12 @@ export function DialogNovoLote({
       </DialogContent>
       <DialogActions>
         <Button onClick={() => setIsOpen(false)}>Cancelar</Button>
-        <Button variant="contained" onClick={handleCreateLote} autoFocus>
+        <Button
+          loading={isLoading}
+          variant="contained"
+          onClick={handleCreateLote}
+          autoFocus
+        >
           Criar
         </Button>
       </DialogActions>

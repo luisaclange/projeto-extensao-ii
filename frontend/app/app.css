@@ -17,6 +17,13 @@ body {
   width: 100vw;
 }
 
+h1 {
+  font-weight: bold;
+  font-size: 28px;
+  color: #eed0d5;
+  font-weight: bolder;
+}
+
 h2 {
   font-weight: bold;
   font-size: 24px;
