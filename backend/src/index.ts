@@ -14,10 +14,12 @@ const app: Application = express();
 // Middleware
 app.use(express.json());
 
-app.use(cors({
-  origin: "http://localhost:5173" // libera só o frontend local
-  // origin: "*" // (cuidado) libera para qualquer origem
-}));
+app.use(
+  cors({
+    // origin: "http://localhost:5173" // libera só o frontend local
+    origin: "*", // (cuidado) libera para qualquer origem
+  })
+);
 
 // Conexão MongoDB
 mongoose

@@ -47,48 +47,35 @@ const lotesController = {
         { $match: filters },
         {
           $lookup: {
-            from: "Pedido",
-            localField: "_id",
-            foreignField: "loteId",
-            as: "pedidos",
-          },
-        },
-        { $unwind: { path: "$pedidos", preserveNullAndEmptyArrays: true } },
-        {
-          $unwind: { path: "$pedidos.items", preserveNullAndEmptyArrays: true },
-        },
-        {
-          $group: {
-            _id: "$_id",
-            lote: { $first: "$$ROOT" }, // pega todos os campos do lote
-            numeroPedidosSet: { $addToSet: "$pedidos._id" },
-            numeroItems: { $sum: "$pedidos.items.qtde" },
+            from: "pedidos", // cuidado: no Mongo o nome é geralmente no plural e em minúsculo
+            let: { loteId: "$_id" },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$loteId", "$$loteId"] } } },
+              {
+                $group: {
+                  _id: null,
+                  numeroPedidos: { $sum: 1 },
+                  numeroItems: { $sum: { $sum: "$items.qtde" } },
+                },
+              },
+            ],
+            as: "resumoPedidos",
           },
         },
         {
           $addFields: {
-            "lote.numeroPedidos": { $size: "$numeroPedidosSet" },
-            "lote.numeroItems": "$numeroItems",
-          },
-        },
-        {
-          $replaceRoot: {
-            newRoot: {
-              $mergeObjects: [
-                "$lote",
-                {
-                  numeroPedidos: "$lote.numeroPedidos",
-                  numeroItems: "$lote.numeroItems",
-                },
+            numeroPedidos: {
+              $ifNull: [
+                { $arrayElemAt: ["$resumoPedidos.numeroPedidos", 0] },
+                0,
               ],
+            },
+            numeroItems: {
+              $ifNull: [{ $arrayElemAt: ["$resumoPedidos.numeroItems", 0] }, 0],
             },
           },
         },
-        {
-          $project: {
-            Pedido: 0, // remove array de pedidos se não quiser retornar
-          },
-        },
+        { $project: { resumoPedidos: 0 } },
       ]);
 
       res.json(lotes);

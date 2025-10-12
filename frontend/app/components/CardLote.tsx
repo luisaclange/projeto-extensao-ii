@@ -46,7 +46,7 @@ export function CardLote({
 
   return (
     <Card
-      className="border-2 border-[#eed0d5] h-full min-h-48"
+      className="border-2 border-[#eed0d5] h-full min-h-48 w-full"
       onClick={() => {
         handleRedirectLote();
       }}
