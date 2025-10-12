@@ -1,5 +1,3 @@
-import { Container } from "@mui/material";
-
 export function HeaderPage({ title }: { title: string }) {
   return (
     <div>

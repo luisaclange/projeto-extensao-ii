@@ -21,23 +21,23 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap",
   },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const theme = createTheme({
     palette: {
-      mode: "dark",
+      mode: "light",
       primary: {
-        main: "#d7586d",
+        main: "#ff096c",
       },
       secondary: {
-        main: "#eed0d5",
+        main: "#f2088a",
       },
       background: {
-        default: "#1a1216",
-        paper: "#2a1b22",
+        default: "#192731",
+        paper: "#192731",
       },
     },
   });

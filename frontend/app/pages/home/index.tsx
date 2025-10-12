@@ -9,6 +9,7 @@ import { CardProduto } from "~/components/CardProduto";
 import { DialogNovoLote } from "~/components/DialogNovoLote";
 import { CardNew } from "~/components/CardNew";
 import { LoaderPage } from "~/components/LoaderPage";
+import { Inventory, Style } from "@mui/icons-material";
 
 export interface IResLote extends ILote {
   createdAt?: string | number | Date;
@@ -49,7 +50,10 @@ export function HomePage() {
         ) : (
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-4">
-              <h2>Lotes</h2>
+              <div className="flex flex-row items-center gap-4 border-b-2 border-dashed pb-2">
+                <Inventory />
+                <h2>Lotes</h2>
+              </div>
 
               <Grid container spacing={4}>
                 {lotes
@@ -60,7 +64,7 @@ export function HomePage() {
                   )
                   .sort((a, b) => Number(b.favorito) - Number(a.favorito))
                   .map((item) => (
-                    <Grid size={4} key={item._id}>
+                    <Grid size={{ xs: 12, md: 4 }} key={item._id}>
                       <CardLote
                         item={item}
                         setItem={(value: Partial<ILote>) => {
@@ -76,27 +80,27 @@ export function HomePage() {
                     </Grid>
                   ))}
 
-                <Grid size={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <CardNew handleClick={() => setIsOpenDialogNewLote(true)} />
                 </Grid>
               </Grid>
             </div>
 
             <div className="flex flex-col gap-4">
-              <h2>Produtos</h2>
+              <div className="flex flex-row items-center gap-4 border-b-2 border-dashed pb-2">
+                <Style />
+                <h2>Produtos</h2>
+              </div>
 
               <Grid container spacing={4}>
                 {produtos.map((item) => (
-                  <Grid size={4}>
+                  <Grid size={{ xs: 12, md: 4 }}>
                     <CardProduto item={item} />
                   </Grid>
                 ))}
 
-                <Grid size={4}>
-                  <CardNew
-                    handleClick={() => handleRedirectProduto()}
-                    size="16"
-                  />
+                <Grid size={{ xs: 12, md: 4 }}>
+                  <CardNew handleClick={() => handleRedirectProduto()} />
                 </Grid>
               </Grid>
             </div>
