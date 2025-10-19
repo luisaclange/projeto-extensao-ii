@@ -27,17 +27,54 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const theme = createTheme({
+    typography: {
+      fontFamily: '"Montserrat", roboto, ui-sans-serif, system-ui, sans-serif',
+    },
     palette: {
       mode: "light",
       primary: {
         main: "#ff096c",
       },
       secondary: {
-        main: "#f2088a",
+        main: "#f4f6fc",
       },
       background: {
         default: "#192731",
         paper: "#192731",
+      },
+    },
+    components: {
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            color: "#f4f6fc", // texto digitado
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#f4f6fc", // borda padrão
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#f4f6fc !important", // força branco no hover
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#f4f6fc", // borda focada
+            },
+            "& input": {
+              color: "#f4f6fc",
+            },
+            "& svg": {
+              color: "#f4f6fc", // ícones internos (ex: adornments)
+            },
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            color: "#f4f6fc",
+            "&.Mui-focused": {
+              color: "#f4f6fc",
+            },
+          },
+        },
       },
     },
   });

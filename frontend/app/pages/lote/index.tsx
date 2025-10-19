@@ -1,9 +1,12 @@
 import {
+  BarChart,
   CalendarMonth,
   ChevronLeft,
   Edit,
   Favorite,
   FavoriteBorder,
+  ReceiptLong,
+  Sell,
 } from "@mui/icons-material";
 import {
   Button,
@@ -11,7 +14,6 @@ import {
   CardContent,
   CircularProgress,
   Container,
-  Divider,
   Grid,
   IconButton,
   TextField,
@@ -111,119 +113,149 @@ export function LotePage() {
 
   return (
     <section>
-      <Container maxWidth="lg" className="mt-4">
+      <Container maxWidth="lg" className="my-4">
         {isLoading ? (
           <LoaderPage />
         ) : (
-          <div>
-            <div className="flex flex-row justify-between items-center">
-              <div className="flex flex-row items-center gap-4">
-                <IconButton onClick={handleBack}>
-                  <ChevronLeft fontSize="large" />
-                </IconButton>
-                <h1>{lote?.titulo}</h1>
+          <div className="flex flex-col gap-16">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-row justify-between items-center">
+                <div className="flex flex-row items-center gap-4">
+                  <IconButton onClick={handleBack}>
+                    <ChevronLeft fontSize="large" color="secondary" />
+                  </IconButton>
+                  <h1>{lote?.titulo}</h1>
+                </div>
+                <div className="flex flex-row gap-2">
+                  <IconButton
+                    color="primary"
+                    className="h-fit"
+                    onClick={handleFavorite}
+                  >
+                    {isLoading ? (
+                      <CircularProgress size="1rem" />
+                    ) : lote?.favorito ? (
+                      <Favorite />
+                    ) : (
+                      <FavoriteBorder />
+                    )}
+                  </IconButton>
+                  <IconButton
+                    className="h-fit"
+                    color="secondary"
+                    onClick={() => setIsEdit(!isEdit)}
+                  >
+                    <Edit />
+                  </IconButton>
+                </div>
               </div>
-              <div className="flex flex-row gap-2">
-                <IconButton
-                  color="primary"
-                  className="h-fit"
-                  onClick={handleFavorite}
-                >
-                  {isLoading ? (
-                    <CircularProgress size="1rem" />
-                  ) : lote?.favorito ? (
-                    <Favorite />
-                  ) : (
-                    <FavoriteBorder />
-                  )}
-                </IconButton>
-                <IconButton
-                  className="h-fit"
-                  onClick={() => setIsEdit(!isEdit)}
-                >
-                  <Edit />
-                </IconButton>
-              </div>
+              {isEdit ? (
+                <div className="pt-8">
+                  <Grid container spacing={4}>
+                    <Grid size={12} className="flex flex-col">
+                      <TextField
+                        value={lote?.titulo}
+                        label="Titulo"
+                        placeholder="Digite aqui"
+                        color="secondary"
+                        onChange={(e) =>
+                          setLote({ ...lote!, titulo: e.target.value })
+                        }
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, md: 4 }} className="flex flex-col">
+                      <TextField
+                        label="Data início"
+                        placeholder="DD/MM/AAAA"
+                        value={lote?.data_inicio}
+                        color="secondary"
+                        onChange={(e) =>
+                          setLote({ ...lote!, data_inicio: e.target.value })
+                        }
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, md: 4 }} className="flex flex-col">
+                      <TextField
+                        label="Data fim"
+                        placeholder="DD/MM/AAAA"
+                        value={lote?.data_fim}
+                        color="secondary"
+                        onChange={(e) =>
+                          setLote({ ...lote!, data_fim: e.target.value })
+                        }
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, md: 4 }} className="flex flex-col">
+                      <Button
+                        className="h-full min-h-14"
+                        variant="contained"
+                        onClick={handleSaveLote}
+                      >
+                        <b>Salvar</b>
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </div>
+              ) : !!lote?.data_fim && !!lote?.data_inicio ? (
+                <div className="flex flex-row gap-4">
+                  <CalendarMonth className="mr-2" />
+                  <b>{`${lote.data_inicio} à ${lote.data_fim}`}</b>
+                </div>
+              ) : (
+                <div></div>
+              )}
             </div>
-            {isEdit ? (
-              <div className="pt-8">
-                <Grid container spacing={4}>
-                  <Grid size={12} className="flex flex-col">
-                    <TextField
-                      value={lote?.titulo}
-                      label="Titulo"
-                      onChange={(e) =>
-                        setLote({ ...lote!, titulo: e.target.value })
-                      }
-                    />
-                  </Grid>
 
-                  <Grid size={4} className="flex flex-col">
-                    <TextField
-                      label="Data início"
-                      value={lote?.data_inicio}
-                      onChange={(e) =>
-                        setLote({ ...lote!, data_inicio: e.target.value })
-                      }
-                    />
-                  </Grid>
-
-                  <Grid size={4} className="flex flex-col">
-                    <TextField
-                      label="Data fim"
-                      value={lote?.data_fim}
-                      onChange={(e) =>
-                        setLote({ ...lote!, data_fim: e.target.value })
-                      }
-                    />
-                  </Grid>
-
-                  <Grid size={4} className="flex flex-col">
-                    <Button onClick={handleSaveLote}>Salvar</Button>
-                  </Grid>
-                </Grid>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-row items-center gap-4 border-b-2 border-dashed pb-2">
+                <BarChart />
+                <h2>Resumo</h2>
               </div>
-            ) : (
-              <div className="flex flex-row gap-4 p-4">
-                <CalendarMonth className="mr-2" />
-                <b>
-                  {!!lote?.data_fim && !!lote?.data_inicio
-                    ? `${lote.data_inicio} à ${lote.data_fim}`
-                    : "----"}
-                </b>
-              </div>
-            )}
 
-            <h3 className="mt-8 mb-4">Resumo</h3>
-
-            <Grid container spacing={4}>
-              {resume.map((item) => (
-                <Grid size={6}>
-                  <Card>
-                    <CardContent>
-                      <div className="flex flex-row justify-between w-full align-middle items-center">
-                        <b className="text-lg">{item.produto}</b>
-                        <span className="text-xl">{item.qtde}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-
-            <h3 className="mt-8 mb-4">Pedidos</h3>
-
-            <Grid container spacing={4}>
-              {lote?.pedidos.map((item) => (
-                <Grid size={4}>
-                  <CardPedido item={item} loteId={id!} produtos={produtos} />
-                </Grid>
-              ))}
-
-              <Grid size={4}>
-                <CardNew handleClick={() => handleRedirectPedido()} />
+              <Grid container spacing={4}>
+                {resume.map((item) => (
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <Card
+                      className="w-full rounded-2xl"
+                      sx={{ borderRadius: "16px", height: "auto" }}
+                      elevation={0}
+                    >
+                      <CardContent className="p-0">
+                        <div className="flex  flex-row justify-between text-[#f4f6fc] w-full align-middle items-center h-full">
+                          <div className="flex flex-row gap-2 items-center">
+                            <Sell />
+                            <b className="text-lg">{item.produto}</b>
+                          </div>
+                          <b className="text-xl">{item.qtde}</b>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
               </Grid>
-            </Grid>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-row items-center gap-4 border-b-2 border-dashed pb-2">
+                <ReceiptLong />
+                <h2>Pedidos</h2>
+              </div>
+
+              <Grid container spacing={4}>
+                {lote?.pedidos.map((item) => (
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <CardPedido item={item} loteId={id!} produtos={produtos} />
+                  </Grid>
+                ))}
+
+                <Grid size={{ xs: 12, md: 4 }}>
+                  <CardNew handleClick={() => handleRedirectPedido()} />
+                </Grid>
+              </Grid>
+            </div>
           </div>
         )}
       </Container>
