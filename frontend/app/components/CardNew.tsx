@@ -3,6 +3,7 @@ import { Card, CardContent } from "@mui/material";
 
 export function CardNew({
   handleClick,
+  size = "8xl",
 }: {
   handleClick: () => void;
   size?: string;
@@ -15,7 +16,7 @@ export function CardNew({
       onClick={handleClick}
     >
       <CardContent className="flex justify-center items-center h-full p-0">
-        <span className="text-8xl text-[#ff096c]">+</span>
+        <span className={`text-8xl text-[#ff096c]`}>+</span>
       </CardContent>
     </Card>
   );

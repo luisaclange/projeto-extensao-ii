@@ -14,6 +14,7 @@ import { useNavigate } from "react-router";
 import type { IResLote } from "~/pages/home";
 import api from "~/services/axios";
 import type { ILote } from "~/types/lote.type";
+import { parseDate } from "~/utils/parseDate";
 
 export function CardLote({
   item,
@@ -74,14 +75,12 @@ export function CardLote({
           </Button>
         </div>
         <div className="flex flex-col gap-4">
-          <p className="text-pink-50 text-sm">
-            <CalendarMonth className="mr-2" />
-            <span>
-              {!!item.data_fim && !!item.data_inicio
-                ? `${item.data_inicio} à ${item.data_fim}`
-                : "----"}
-            </span>
-          </p>
+          {!!item.data_fim && !!item.data_inicio ? (
+            <p className="text-pink-50 text-sm">
+              <CalendarMonth className="mr-2" />
+              <span>{`${parseDate(item.data_inicio)} à ${parseDate(item.data_fim)}`}</span>
+            </p>
+          ) : null}
           <p className="text-pink-50 text-sm">
             <PeopleOutline className="mr-2" />
             <span>

@@ -55,7 +55,7 @@ export function HomePage() {
                 <h2>Lotes</h2>
               </div>
 
-              <Grid container spacing={4}>
+              <Grid container spacing={{ xs: 2, md: 4 }}>
                 {lotes
                   .sort(
                     (a, b) =>
@@ -92,7 +92,7 @@ export function HomePage() {
                 <h2>Produtos</h2>
               </div>
 
-              <Grid container spacing={4}>
+              <Grid container spacing={{ xs: 2, md: 4 }}>
                 {produtos.map((item) => (
                   <Grid size={{ xs: 12, md: 4 }}>
                     <CardProduto item={item} />

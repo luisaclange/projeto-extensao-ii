@@ -21,15 +21,22 @@ export function DialogNovoLote({
 }) {
   const [newLote, setNewLote] = useState<Partial<ILote>>();
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   const navigate = useNavigate();
 
   const handleCreateLote = async () => {
     try {
       setIsLoading(true);
+      if (!newLote?.titulo) {
+        setErrorMessage("Campo obrigatório");
+        return;
+      }
       const response = await api.post("/lotes", newLote);
       navigate(`/lote?id=${response.data?._id}&edit=true`);
     } catch (error) {
+      console.error(error);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -52,8 +59,19 @@ export function DialogNovoLote({
             label="Titulo"
             value={newLote?.titulo}
             className="w-full"
-            onChange={(e) => setNewLote({ titulo: e.target.value })}
+            error={!!errorMessage}
+            onChange={(e) => {
+              setNewLote({ titulo: e.target.value });
+              if (!e.target.value) {
+                setErrorMessage("Campo obrigatório");
+              } else {
+                setErrorMessage(undefined);
+              }
+            }}
           />
+          {!!errorMessage ? (
+            <div className="mt-1 text-red-500">{errorMessage}</div>
+          ) : null}
         </DialogContentText>
       </DialogContent>
       <DialogActions>

@@ -24,17 +24,30 @@ export function ProdutoPage() {
   const navigate = useNavigate();
 
   const [produto, setProduto] = useState<IProduto>();
+  const [isLoadingPage, setIsLoadingPage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   const handleSaveProduto = async () => {
-    if (id) {
-      await api.put(`/produtos/${id}`, produto);
-    } else {
-      await api.post(`/produtos`, produto);
-    }
+    try {
+      if (!produto?.nome) {
+        setErrorMessage("Campo obrigatório");
+        return;
+      }
 
-    navigate("/");
+      if (id) {
+        await api.put(`/produtos/${id}`, produto);
+      } else {
+        await api.post(`/produtos`, produto);
+      }
+
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDeleteProduto = async () => {
@@ -49,14 +62,14 @@ export function ProdutoPage() {
 
   useEffect(() => {
     if (id) {
-      setIsLoading(true);
+      setIsLoadingPage(true);
       Promise.all([api.get(`/produtos/${id}`)])
         .then((data) => {
           const [resProduto] = data;
           setProduto(resProduto.data);
         })
         .finally(() => {
-          setIsLoading(false);
+          setIsLoadingPage(false);
         });
     }
   }, []);
@@ -64,42 +77,55 @@ export function ProdutoPage() {
   return (
     <section>
       <Container maxWidth="lg" className="mt-4">
-        {isLoading ? (
+        {isLoadingPage ? (
           <LoaderPage />
         ) : (
           <div className="flex flex-col gap-8">
             <div className="flex flex-row items-center gap-4">
-              <IconButton onClick={handleRedirectHome}>
+              <IconButton color="secondary" onClick={handleRedirectHome}>
                 <ChevronLeft fontSize="large" />
               </IconButton>
-              <h1>{produto?.nome || "Novo produto"}</h1>
+              <h1>{id ? "Editar produto" : "Novo produto"}</h1>
             </div>
 
-            <Grid container spacing={4}>
+            <Grid container spacing={{ xs: 2, md: 4 }}>
               <Grid size={12} className="flex flex-col">
                 <TextField
                   label="Nome"
+                  error={!!errorMessage}
                   value={produto?.nome}
-                  onChange={(e) =>
-                    setProduto({ ...produto!, nome: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setProduto({ ...produto!, nome: e.target.value });
+                    if (!e.target.value) {
+                      setErrorMessage("Campo obrigatório");
+                    } else {
+                      setErrorMessage(undefined);
+                    }
+                  }}
                 />
+                {!!errorMessage ? (
+                  <div className="mt-1 text-red-500">{errorMessage}</div>
+                ) : null}
               </Grid>
 
               <Grid size={12}>
-                <div className="flex flex-row justify-between">
-                  {id ? (
-                    <Button onClick={() => setIsOpenDialog(true)}>
-                      Excluir
-                    </Button>
-                  ) : (
-                    <div />
-                  )}
-                  <div className="flex flex-row gap-4">
-                    <Button variant="contained" onClick={handleSaveProduto}>
-                      Salvar
-                    </Button>
-                  </div>
+                <div className="flex flex-col gap-4 md:flex-row justify-between">
+                  <Button
+                    hidden={!id}
+                    className="w-full md:max-w-56 min-h-14"
+                    variant="outlined"
+                    onClick={() => setIsOpenDialog(true)}
+                  >
+                    Excluir
+                  </Button>
+                  <Button
+                    variant="contained"
+                    className="w-full md:max-w-56 min-h-14"
+                    loading={isLoading}
+                    onClick={handleSaveProduto}
+                  >
+                    <b>Salvar</b>
+                  </Button>
                 </div>
               </Grid>
             </Grid>
@@ -118,13 +144,15 @@ export function ProdutoPage() {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Você não poderá mais usá-lo
+            <span className="text-[#f4f6fc]">Você não poderá mais usá-lo</span>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsOpenDialog(false)}>Cancelar</Button>
+          <Button onClick={() => setIsOpenDialog(false)}>
+            <b>Cancelar</b>
+          </Button>
           <Button variant="contained" onClick={handleDeleteProduto} autoFocus>
-            Sim
+            <b>Sim</b>
           </Button>
         </DialogActions>
       </Dialog>

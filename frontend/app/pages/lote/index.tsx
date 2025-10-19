@@ -27,6 +27,7 @@ import api from "~/services/axios";
 import type { ILote } from "~/types/lote.type";
 import type { IPedido } from "~/types/pedido.type";
 import type { IProduto } from "~/types/produto.type";
+import { parseDate } from "~/utils/parseDate";
 
 interface IResLote extends ILote {
   createdAt: Date;
@@ -42,7 +43,9 @@ export function LotePage() {
   const navigate = useNavigate();
 
   const [lote, setLote] = useState<IResLote>();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHeart, setIsLoadingHeart] = useState(false);
+  const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [produtos, setProdutos] = useState<IProduto[]>([]);
   const [resume, setResume] = useState<
     {
@@ -51,14 +54,26 @@ export function LotePage() {
     }[]
   >([]);
   const [isEdit, setIsEdit] = useState<boolean>(edit == "true");
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   const handleSaveLote = async () => {
-    await api.put(`/lotes/${id}`, lote);
-    setIsEdit(false);
+    try {
+      if (!lote?.titulo) {
+        setErrorMessage("Campo obrigatório");
+      }
+      setIsLoading(true);
+      await api.put(`/lotes/${id}`, lote);
+      setIsEdit(false);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleFavorite = async () => {
     try {
+      setIsLoadingHeart(true);
       await api.put(`/lotes/${id}`, { favorito: !lote?.favorito });
       setLote({
         ...lote!,
@@ -66,6 +81,8 @@ export function LotePage() {
       });
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoadingHeart(false);
     }
   };
 
@@ -78,26 +95,28 @@ export function LotePage() {
   };
 
   const getResume = (dataProdutos: IProduto[], dataPedidos: IPedido[]) => {
-    const data = dataProdutos.map((produto) => {
-      return {
-        produto: produto.nome,
-        qtde: dataPedidos.reduce((count: number, pedido) => {
-          pedido.items.forEach((item) => {
-            if (item.produtoId == produto._id) {
-              count += Number(item.qtde);
-            }
-          });
-          return count;
-        }, 0),
-      };
-    });
+    const data = dataProdutos
+      .map((produto) => {
+        return {
+          produto: produto.nome,
+          qtde: dataPedidos.reduce((count: number, pedido) => {
+            pedido.items.forEach((item) => {
+              if (item.produtoId == produto._id) {
+                count += Number(item.qtde);
+              }
+            });
+            return count;
+          }, 0),
+        };
+      })
+      .filter((produto) => produto.qtde > 0);
 
     setResume(data);
   };
 
   useEffect(() => {
     if (id) {
-      setIsLoading(true);
+      setIsLoadingPage(true);
       Promise.all([api.get(`/lotes/${id}`), api.get("/produtos")])
         .then((data) => {
           const [resLote, resProdutos] = data;
@@ -106,7 +125,7 @@ export function LotePage() {
           getResume(resProdutos.data, resLote.data.pedidos);
         })
         .finally(() => {
-          setIsLoading(false);
+          setIsLoadingPage(false);
         });
     }
   }, []);
@@ -114,7 +133,7 @@ export function LotePage() {
   return (
     <section>
       <Container maxWidth="lg" className="my-4">
-        {isLoading ? (
+        {isLoadingPage ? (
           <LoaderPage />
         ) : (
           <div className="flex flex-col gap-16">
@@ -132,7 +151,7 @@ export function LotePage() {
                     className="h-fit"
                     onClick={handleFavorite}
                   >
-                    {isLoading ? (
+                    {isLoadingHeart ? (
                       <CircularProgress size="1rem" />
                     ) : lote?.favorito ? (
                       <Favorite />
@@ -151,23 +170,33 @@ export function LotePage() {
               </div>
               {isEdit ? (
                 <div className="pt-8">
-                  <Grid container spacing={4}>
+                  <Grid container spacing={{ xs: 2, md: 4 }}>
                     <Grid size={12} className="flex flex-col">
                       <TextField
                         value={lote?.titulo}
                         label="Titulo"
                         placeholder="Digite aqui"
                         color="secondary"
-                        onChange={(e) =>
-                          setLote({ ...lote!, titulo: e.target.value })
-                        }
+                        onChange={(e) => {
+                          setLote({ ...lote!, titulo: e.target.value });
+                          if (!e.target.value) {
+                            setErrorMessage("Campo obrigatório");
+                          } else {
+                            setErrorMessage(undefined);
+                          }
+                        }}
+                        error={!!errorMessage}
                       />
+                      {!!errorMessage ? (
+                        <div className="mt-1 text-red-500">{errorMessage}</div>
+                      ) : null}
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 4 }} className="flex flex-col">
                       <TextField
                         label="Data início"
-                        placeholder="DD/MM/AAAA"
+                        type="date"
+                        InputLabelProps={{ shrink: true }}
                         value={lote?.data_inicio}
                         color="secondary"
                         onChange={(e) =>
@@ -179,7 +208,8 @@ export function LotePage() {
                     <Grid size={{ xs: 12, md: 4 }} className="flex flex-col">
                       <TextField
                         label="Data fim"
-                        placeholder="DD/MM/AAAA"
+                        type="date"
+                        InputLabelProps={{ shrink: true }}
                         value={lote?.data_fim}
                         color="secondary"
                         onChange={(e) =>
@@ -192,6 +222,7 @@ export function LotePage() {
                       <Button
                         className="h-full min-h-14"
                         variant="contained"
+                        loading={isLoading}
                         onClick={handleSaveLote}
                       >
                         <b>Salvar</b>
@@ -202,41 +233,43 @@ export function LotePage() {
               ) : !!lote?.data_fim && !!lote?.data_inicio ? (
                 <div className="flex flex-row gap-4">
                   <CalendarMonth className="mr-2" />
-                  <b>{`${lote.data_inicio} à ${lote.data_fim}`}</b>
+                  <b>{`${parseDate(lote.data_inicio)} à ${parseDate(lote.data_fim)}`}</b>
                 </div>
               ) : (
                 <div></div>
               )}
             </div>
 
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-row items-center gap-4 border-b-2 border-dashed pb-2">
-                <BarChart />
-                <h2>Resumo</h2>
-              </div>
+            {resume.length > 0 ? (
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-row items-center gap-4 border-b-2 border-dashed pb-2">
+                  <BarChart />
+                  <h2>Resumo</h2>
+                </div>
 
-              <Grid container spacing={4}>
-                {resume.map((item) => (
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <Card
-                      className="w-full rounded-2xl"
-                      sx={{ borderRadius: "16px", height: "auto" }}
-                      elevation={0}
-                    >
-                      <CardContent className="p-0">
-                        <div className="flex  flex-row justify-between text-[#f4f6fc] w-full align-middle items-center h-full">
-                          <div className="flex flex-row gap-2 items-center">
-                            <Sell />
-                            <b className="text-lg">{item.produto}</b>
+                <Grid container spacing={{ xs: 2, md: 4 }}>
+                  {resume.map((item) => (
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <Card
+                        className="w-full rounded-2xl"
+                        sx={{ borderRadius: "16px", height: "auto" }}
+                        elevation={0}
+                      >
+                        <CardContent className="p-0">
+                          <div className="flex  flex-row justify-between text-[#f4f6fc] w-full align-middle items-center h-full">
+                            <div className="flex flex-row gap-2 items-center">
+                              <Sell />
+                              <b className="text-lg">{item.produto}</b>
+                            </div>
+                            <b className="text-xl">{item.qtde}</b>
                           </div>
-                          <b className="text-xl">{item.qtde}</b>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </div>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </div>
+            ) : null}
 
             <div className="flex flex-col gap-4">
               <div className="flex flex-row items-center gap-4 border-b-2 border-dashed pb-2">
@@ -244,7 +277,7 @@ export function LotePage() {
                 <h2>Pedidos</h2>
               </div>
 
-              <Grid container spacing={4}>
+              <Grid container spacing={{ xs: 2, md: 4 }}>
                 {lote?.pedidos.map((item) => (
                   <Grid size={{ xs: 12, md: 4 }}>
                     <CardPedido item={item} loteId={id!} produtos={produtos} />
