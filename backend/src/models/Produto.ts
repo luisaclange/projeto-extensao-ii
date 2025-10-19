@@ -1,14 +1,9 @@
-import mongoose, { Schema, Document } from "mongoose";
+import { db } from "../firestore";
 
-export interface IProduto extends Document {
+export interface IProduto {
   nome: string;
 }
 
-const ProdutoSchema: Schema = new Schema(
-  {
-    nome: { type: String, required: true },
-  },
-  { timestamps: true }
-);
+const produtosRef = db.collection("produtos");
 
-export default mongoose.model<IProduto>("Produto", ProdutoSchema);
+export { produtosRef };

@@ -101,7 +101,7 @@ export function LotePage() {
           produto: produto.nome,
           qtde: dataPedidos.reduce((count: number, pedido) => {
             pedido.items.forEach((item) => {
-              if (item.produtoId == produto._id) {
+              if (item.produtoId == produto.id) {
                 count += Number(item.qtde);
               }
             });

@@ -1,24 +1,16 @@
-import mongoose, { Schema, Document } from "mongoose";
+import { db } from "../firestore";
 
-export interface IPedido extends Document {
-  loteId: string;
-  cliente: string;
-  items: {
-    produtoId: string;
-    qtde: number;
-  }[];
+export interface IItem {
+  produtoId: string;
+  qtde: string;
 }
 
-const PedidoSchema: Schema = new Schema(
-  {
-    loteId: { type: Schema.Types.ObjectId, ref: "Lote", required: true },
-    cliente: { type: String, required: true },
-    items: [{
-        produtoId: { type: Schema.Types.ObjectId, ref: "Produto", required: true },
-        qtde: { type: Number, required: true },
-    }]
-  },
-  { timestamps: true }
-);
+export interface IPedido {
+  loteId: string;
+  cliente: string;
+  items: IItem[];
+}
 
-export default mongoose.model<IPedido>("Pedido", PedidoSchema);
+const pedidosRef = db.collection("pedidos");
+
+export { pedidosRef };

@@ -64,15 +64,13 @@ export function HomePage() {
                   )
                   .sort((a, b) => Number(b.favorito) - Number(a.favorito))
                   .map((item) => (
-                    <Grid size={{ xs: 12, md: 4 }} key={item._id}>
+                    <Grid size={{ xs: 12, md: 4 }} key={item.id}>
                       <CardLote
                         item={item}
                         setItem={(value: Partial<ILote>) => {
                           setLotes(
                             lotes.map((lote) =>
-                              lote._id == item._id
-                                ? { ...item, ...value }
-                                : lote
+                              lote.id == item.id ? { ...item, ...value } : lote
                             )
                           );
                         }}

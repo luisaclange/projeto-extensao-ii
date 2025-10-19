@@ -1,13 +1,19 @@
 import { Request, Response } from "express";
-import Lote, { ILote } from "../models/Lote";
-import Pedido from "../models/Pedido";
+import { lotesRef } from "../models/Lote";
+import { IItem, IPedido, pedidosRef } from "../models/Pedido";
 
 const lotesController = {
   async create(req: Request, res: Response): Promise<void> {
     try {
-      const lote: ILote = new Lote(req.body);
-      await lote.save();
+      const newLote = await lotesRef.add({
+        ...req.body,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      const loteRef = lotesRef.doc(newLote.id);
+      const snapshot = await loteRef.get();
 
+      const lote = { id: snapshot.id, ...snapshot.data() };
       res.status(201).json(lote);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
@@ -16,12 +22,20 @@ const lotesController = {
 
   async update(req: Request, res: Response): Promise<void> {
     try {
-      const lote = await Lote.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-      });
+      const loteRef = lotesRef.doc(req.params.id);
+      const snapshot = await loteRef.get();
 
-      if (lote) res.json(lote);
-      else res.status(404).json({ error: "Lote não encontrado" });
+      if (!snapshot.exists) {
+        res.status(404).json({ error: "Lote não encontrado" });
+        return;
+      }
+
+      await loteRef.update({
+        ...req.body,
+        updatedAt: new Date().toISOString(),
+      });
+      const updated = await loteRef.get();
+      res.json({ id: updated.id, ...updated.data() });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -29,12 +43,16 @@ const lotesController = {
 
   async delete(req: Request, res: Response): Promise<void> {
     try {
-      const lote = await Lote.findByIdAndDelete(req.params.id);
+      const loteRef = lotesRef.doc(req.params.id);
+      const snapshot = await loteRef.get();
 
-      if (lote) {
-        await Pedido.deleteMany({ loteId: req.params.id });
-        res.json({ message: "Lote deletado com sucesso" });
-      } else res.status(404).json({ error: "Lote não encontrado" });
+      if (!snapshot.exists) {
+        res.status(404).json({ error: "Lote não encontrado" });
+        return;
+      }
+
+      await loteRef.delete();
+      res.json({ message: "Lote deletado com sucesso" });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -42,41 +60,34 @@ const lotesController = {
 
   async getAll(req: Request, res: Response): Promise<void> {
     try {
-      const filters = req.query;
-      const lotes = await Lote.aggregate([
-        { $match: filters },
-        {
-          $lookup: {
-            from: "pedidos", // cuidado: no Mongo o nome é geralmente no plural e em minúsculo
-            let: { loteId: "$_id" },
-            pipeline: [
-              { $match: { $expr: { $eq: ["$loteId", "$$loteId"] } } },
-              {
-                $group: {
-                  _id: null,
-                  numeroPedidos: { $sum: 1 },
-                  numeroItems: { $sum: { $sum: "$items.qtde" } },
-                },
-              },
-            ],
-            as: "resumoPedidos",
-          },
-        },
-        {
-          $addFields: {
-            numeroPedidos: {
-              $ifNull: [
-                { $arrayElemAt: ["$resumoPedidos.numeroPedidos", 0] },
-                0,
-              ],
-            },
-            numeroItems: {
-              $ifNull: [{ $arrayElemAt: ["$resumoPedidos.numeroItems", 0] }, 0],
-            },
-          },
-        },
-        { $project: { resumoPedidos: 0 } },
-      ]);
+      const snapshot = await lotesRef.get();
+      const lotes = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        numeroPedidos: 0,
+        numeroItems: 0,
+      }));
+
+      for (const lote of lotes) {
+        const pedidosSnap = await pedidosRef
+          .where("loteId", "==", lote.id)
+          .get();
+
+        const pedidos = pedidosSnap.docs.map((doc) => doc.data());
+
+        // calcular resumo
+        const numeroPedidos = pedidos.length;
+        const numeroItems = pedidos.reduce((sum, pedido) => {
+          const itemsQtde = (pedido.items || []).reduce(
+            (s: number, item: IItem) => s + (item.qtde ? Number(item.qtde) : 0),
+            0
+          );
+          return sum + itemsQtde;
+        }, 0);
+
+        lote.numeroPedidos = numeroPedidos;
+        lote.numeroItems = numeroItems;
+      }
 
       res.json(lotes);
     } catch (error: any) {
@@ -86,18 +97,27 @@ const lotesController = {
 
   async getOne(req: Request, res: Response): Promise<void> {
     try {
-      const lote = await Lote.findById(req.params.id);
+      const loteRef = lotesRef.doc(req.params.id);
+      const snapshot = await loteRef.get();
 
-      if (lote) {
-        const pedidos = await Pedido.find({
-          loteId: req.params.id,
-        });
+      if (!snapshot.exists) {
+        res.status(404).json({ error: "Lote não encontrado" });
+        return;
+      }
 
-        res.json({
-          ...lote?.toJSON(),
-          pedidos,
-        });
-      } else res.status(404).json({ error: "Lote não encontrado" });
+      const pedidosSnap = await pedidosRef
+        .where("loteId", "==", snapshot.id)
+        .get();
+
+      const pedidos = pedidosSnap.docs.map((doc) => doc.data());
+
+      const lote = {
+        id: snapshot.id,
+        ...snapshot.data(),
+        pedidos,
+      };
+
+      res.json(lote);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }

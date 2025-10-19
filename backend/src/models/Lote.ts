@@ -1,20 +1,12 @@
-import mongoose, { Schema, Document } from "mongoose";
+import { db } from "../firestore";
 
-export interface ILote extends Document {
+export interface ILote {
   titulo: string;
   data_inicio?: string;
   data_fim?: string;
   favorito: boolean;
 }
 
-const LoteSchema: Schema = new Schema(
-  {
-    titulo: { type: String, required: true },
-    data_inicio: { type: String, required: false },
-    data_fim: { type: String, required: false },
-    favorito: { type: Boolean, required: false, default: false },
-  },
-  { timestamps: true }
-);
+const lotesRef = db.collection("lotes");
 
-export default mongoose.model<ILote>("Lote", LoteSchema);
+export { lotesRef };

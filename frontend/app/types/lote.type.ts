@@ -1,7 +1,7 @@
 export interface ILote {
-    _id: string;
-    titulo: string;
-    data_inicio: string;
-    data_fim: string;
-    favorito: boolean;
+  id: string;
+  titulo: string;
+  data_inicio: string;
+  data_fim: string;
+  favorito: boolean;
 }

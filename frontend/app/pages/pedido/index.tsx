@@ -42,7 +42,7 @@ export function PedidoPage() {
   useEffect(() => {
     setProdutosRestantes(
       produtos.filter(
-        (prod: IProduto) => !items.some((item) => item.produtoId == prod._id)
+        (prod: IProduto) => !items.some((item) => item.produtoId == prod.id)
       )
     );
   }, [items]);
@@ -114,7 +114,7 @@ export function PedidoPage() {
           resProdutos.data.filter(
             (prod: IProduto) =>
               !resPedido?.data?.items?.some(
-                (item: IItem) => item.produtoId == prod._id
+                (item: IItem) => item.produtoId == prod.id
               )
           )
         );
@@ -188,10 +188,10 @@ export function PedidoPage() {
                                 <MenuItem
                                   hidden={
                                     !produtosRestantes.some(
-                                      (prodRes) => prodRes._id == prod._id
+                                      (prodRes) => prodRes.id == prod.id
                                     )
                                   }
-                                  value={prod._id}
+                                  value={prod.id}
                                 >
                                   <span className="text-[#f4f6fc]">
                                     {prod.nome}
@@ -211,7 +211,7 @@ export function PedidoPage() {
                                 handleChangeItemsList(
                                   index,
                                   "qtde",
-                                  e.target.value
+                                  e.target.value.toString()
                                 )
                               }
                             />

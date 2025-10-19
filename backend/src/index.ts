@@ -1,5 +1,4 @@
 import express, { Application } from "express";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 
@@ -20,12 +19,6 @@ app.use(
     origin: "*", // (cuidado) libera para qualquer origem
   })
 );
-
-// Conexão MongoDB
-mongoose
-  .connect(process.env.MONGO_URI as string)
-  .then(() => console.log("✅ Conectado ao MongoDB"))
-  .catch((err) => console.error("Erro ao conectar ao MongoDB:", err));
 
 // Rotas
 app.use("/api/lotes", lotesRoutes);

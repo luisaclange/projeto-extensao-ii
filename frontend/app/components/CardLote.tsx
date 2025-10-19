@@ -27,13 +27,13 @@ export function CardLote({
   const navigate = useNavigate();
 
   const handleRedirectLote = () => {
-    navigate(`/lote?id=${item._id}`);
+    navigate(`/lote?id=${item.id}`);
   };
 
   const handleFavorite = async () => {
     try {
       setIsLoading(true);
-      await api.put(`/lotes/${item._id}`, {
+      await api.put(`/lotes/${item.id}`, {
         favorito: !item.favorito,
       });
       setItem({

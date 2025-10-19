@@ -1,61 +1,96 @@
 import { Request, Response } from "express";
-import Pedido, { IPedido } from "../models/Pedido";
+import { pedidosRef } from "../models/Pedido";
 
 const pedidosController = {
-    async create (req: Request, res: Response): Promise<void> {
-        try {
-            const pedido: IPedido = new Pedido(req.body);
-            await pedido.save();
+  async create(req: Request, res: Response): Promise<void> {
+    try {
+      const newPedido = await pedidosRef.add({
+        ...req.body,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      const pedidoRef = pedidosRef.doc(newPedido.id);
+      const snapshot = await pedidoRef.get();
 
-            res.status(201).json(pedido);
-        } catch (error: any) {
-            res.status(400).json({ error: error.message });
-        }
-    },
+      const pedido = { id: snapshot.id, ...snapshot.data() };
+      res.status(201).json(pedido);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  },
 
+  async update(req: Request, res: Response): Promise<void> {
+    try {
+      const pedidoRef = pedidosRef.doc(req.params.id);
+      const snapshot = await pedidoRef.get();
 
-    async update (req: Request, res: Response): Promise<void> {
-        try {
-            const pedido = await Pedido.findByIdAndUpdate(req.params.id, req.body, {
-                new: true,
-            });
+      if (!snapshot.exists) {
+        res.status(404).json({ error: "Pedido não encontrado" });
+        return;
+      }
 
-            res.json(pedido);
-        } catch (error: any) {
-            res.status(400).json({ error: error.message });
-        }
-    },
+      await pedidoRef.update({
+        ...req.body,
+        updatedAt: new Date().toISOString(),
+      });
+      const updated = await pedidoRef.get();
+      res.json({ id: updated.id, ...updated.data() });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  },
 
-    async delete (req: Request, res: Response): Promise<void> {
-        try {
-            await Pedido.findByIdAndDelete(req.params.id);
+  async delete(req: Request, res: Response): Promise<void> {
+    try {
+      const pedidoRef = pedidosRef.doc(req.params.id);
+      const snapshot = await pedidoRef.get();
 
-            res.json({ message: "Pedido deletado com sucesso" });
-        } catch (error: any) {
-            res.status(400).json({ error: error.message });
-        }
-    },
+      if (!snapshot.exists) {
+        res.status(404).json({ error: "Pedido não encontrado" });
+        return;
+      }
 
-    async getAll (req: Request, res: Response): Promise<void> {
-        try {
-            const filters = req.query;
-            const pedidos: IPedido[] = await Pedido.find(filters);
+      await pedidoRef.delete();
+      res.json({ message: "Pedido deletado com sucesso" });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  },
 
-            res.json(pedidos);
-        } catch (error: any) {
-            res.status(400).json({ error: error.message });
-        }
-    },
+  async getAll(req: Request, res: Response): Promise<void> {
+    try {
+      const snapshot = await pedidosRef.get();
+      const pedidos = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    async getOne (req: Request, res: Response): Promise<void> {
-        try {
-            const pedido = await Pedido.findById(req.params.id);
+      res.json(pedidos);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  },
 
-            res.json(pedido);
-        } catch (error: any) {
-            res.status(400).json({ error: error.message });
-        }
-    },
-}
+  async getOne(req: Request, res: Response): Promise<void> {
+    try {
+      const pedidoRef = pedidosRef.doc(req.params.id);
+      const snapshot = await pedidoRef.get();
+
+      if (!snapshot.exists) {
+        res.status(404).json({ error: "Pedido não encontrado" });
+        return;
+      }
+
+      const pedido = {
+        id: snapshot.id,
+        ...snapshot.data(),
+      };
+
+      res.json(pedido);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  },
+};
 
 export default pedidosController;

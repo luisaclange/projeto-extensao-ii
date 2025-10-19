@@ -33,7 +33,7 @@ export function DialogNovoLote({
         return;
       }
       const response = await api.post("/lotes", newLote);
-      navigate(`/lote?id=${response.data?._id}&edit=true`);
+      navigate(`/lote?id=${response.data?.id}&edit=true`);
     } catch (error) {
       console.error(error);
     } finally {
