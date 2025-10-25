@@ -62,7 +62,13 @@ export function HomePage() {
                       new Date(a.createdAt!).getTime() -
                       new Date(b.createdAt!).getTime()
                   )
-                  .sort((a, b) => Number(b.favorito) - Number(a.favorito))
+                  .sort((a, b) =>
+                    a.favorito && !b.favorito
+                      ? -1
+                      : b.favorito && !a.favorito
+                        ? 1
+                        : 0
+                  )
                   .map((item) => (
                     <Grid size={{ xs: 12, md: 4 }} key={item.id}>
                       <CardLote

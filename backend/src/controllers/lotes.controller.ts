@@ -109,7 +109,10 @@ const lotesController = {
         .where("loteId", "==", snapshot.id)
         .get();
 
-      const pedidos = pedidosSnap.docs.map((doc) => doc.data());
+      const pedidos = pedidosSnap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
       const lote = {
         id: snapshot.id,

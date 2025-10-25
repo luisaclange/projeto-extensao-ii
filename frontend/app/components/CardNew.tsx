@@ -11,7 +11,11 @@ export function CardNew({
   return (
     <Card
       className="p-0 bg-transparent h-full"
-      sx={{ backgroundColor: "#19273170", borderRadius: "16px" }}
+      sx={{
+        backgroundColor: "#19273170",
+        borderRadius: "16px",
+        minHeight: "136px",
+      }}
       color="transparent"
       onClick={handleClick}
     >

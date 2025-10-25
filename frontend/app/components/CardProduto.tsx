@@ -12,7 +12,7 @@ export function CardProduto({ item }: { item: IProduto }) {
   return (
     <Card
       className="h-full"
-      sx={{ borderRadius: "16px" }}
+      sx={{ borderRadius: "16px", minHeight: "136px" }}
       onClick={() => handleRedirectProduto(item.id)}
     >
       <CardContent className="p-4 flex justify-between">
