@@ -10,6 +10,7 @@ import { DialogNovoLote } from "~/components/DialogNovoLote";
 import { CardNew } from "~/components/CardNew";
 import { LoaderPage } from "~/components/LoaderPage";
 import { Inventory, Style } from "@mui/icons-material";
+import { AppBar } from "~/components/AppBar";
 
 export interface IResLote extends ILote {
   createdAt?: string | number | Date;
@@ -44,6 +45,7 @@ export function HomePage() {
 
   return (
     <section>
+      <AppBar />
       <Container maxWidth="lg" className="my-4">
         {isLoading ? (
           <LoaderPage />
@@ -60,14 +62,14 @@ export function HomePage() {
                   .sort(
                     (a, b) =>
                       new Date(a.createdAt!).getTime() -
-                      new Date(b.createdAt!).getTime()
+                      new Date(b.createdAt!).getTime(),
                   )
                   .sort((a, b) =>
                     a.favorito && !b.favorito
                       ? -1
                       : b.favorito && !a.favorito
                         ? 1
-                        : 0
+                        : 0,
                   )
                   .map((item) => (
                     <Grid size={{ xs: 12, md: 4 }} key={item.id}>
@@ -76,8 +78,8 @@ export function HomePage() {
                         setItem={(value: Partial<ILote>) => {
                           setLotes(
                             lotes.map((lote) =>
-                              lote.id == item.id ? { ...item, ...value } : lote
-                            )
+                              lote.id == item.id ? { ...item, ...value } : lote,
+                            ),
                           );
                         }}
                       />

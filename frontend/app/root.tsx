@@ -86,12 +86,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="h-screen">
         <ThemeProvider theme={theme}>
-          <main>
-            <AppBar />
-            {children}
-          </main>
+          <main className="h-full">{children}</main>
         </ThemeProvider>
         <ScrollRestoration />
         <Scripts />

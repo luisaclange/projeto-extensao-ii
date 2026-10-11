@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { AppBar } from "~/components/AppBar";
 import { CardNew } from "~/components/CardNew";
 import { CardPedido } from "~/components/CardPedido";
 import { LoaderPage } from "~/components/LoaderPage";
@@ -132,6 +133,7 @@ export function LotePage() {
 
   return (
     <section>
+      <AppBar />
       <Container maxWidth="lg" className="my-4">
         {isLoadingPage ? (
           <LoaderPage />

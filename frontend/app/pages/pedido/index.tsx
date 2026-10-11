@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { AppBar } from "~/components/AppBar";
 import { CardNew } from "~/components/CardNew";
 import { LoaderPage } from "~/components/LoaderPage";
 import api from "~/services/axios";
@@ -42,8 +43,8 @@ export function PedidoPage() {
   useEffect(() => {
     setProdutosRestantes(
       produtos.filter(
-        (prod: IProduto) => !items.some((item) => item.produtoId == prod.id)
-      )
+        (prod: IProduto) => !items.some((item) => item.produtoId == prod.id),
+      ),
     );
   }, [items]);
 
@@ -114,9 +115,9 @@ export function PedidoPage() {
           resProdutos.data.filter(
             (prod: IProduto) =>
               !resPedido?.data?.items?.some(
-                (item: IItem) => item.produtoId == prod.id
-              )
-          )
+                (item: IItem) => item.produtoId == prod.id,
+              ),
+          ),
         );
         setPedido(resPedido?.data);
         setItems(resPedido?.data?.items || []);
@@ -128,6 +129,7 @@ export function PedidoPage() {
 
   return (
     <section>
+      <AppBar />
       <Container maxWidth="lg" className="mt-4">
         {isLoadingPage ? (
           <LoaderPage />
@@ -175,7 +177,7 @@ export function PedidoPage() {
                                 handleChangeItemsList(
                                   index,
                                   "produtoId",
-                                  e.target.value
+                                  e.target.value,
                                 );
                                 if (!e.target.value) {
                                   setErrorMessage("Campo obrigatório");
@@ -188,7 +190,7 @@ export function PedidoPage() {
                                 <MenuItem
                                   hidden={
                                     !produtosRestantes.some(
-                                      (prodRes) => prodRes.id == prod.id
+                                      (prodRes) => prodRes.id == prod.id,
                                     )
                                   }
                                   value={prod.id}
@@ -211,7 +213,7 @@ export function PedidoPage() {
                                 handleChangeItemsList(
                                   index,
                                   "qtde",
-                                  e.target.value.toString()
+                                  e.target.value.toString(),
                                 )
                               }
                             />

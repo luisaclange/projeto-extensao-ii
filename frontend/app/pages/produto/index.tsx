@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { AppBar } from "~/components/AppBar";
 import { LoaderPage } from "~/components/LoaderPage";
 import api from "~/services/axios";
 import type { IProduto } from "~/types/produto.type";
@@ -76,6 +77,7 @@ export function ProdutoPage() {
 
   return (
     <section>
+      <AppBar />
       <Container maxWidth="lg" className="mt-4">
         {isLoadingPage ? (
           <LoaderPage />
