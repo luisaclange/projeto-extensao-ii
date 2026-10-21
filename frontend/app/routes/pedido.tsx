@@ -1,3 +1,4 @@
+import { verifyIfUserIsAuthenticated } from "~/middleware/verifyIfUserIsAuthenticated";
 import type { Route } from "./+types/home";
 import { PedidoPage } from "~/pages/pedido";
 
@@ -6,6 +7,10 @@ export function meta({}: Route.MetaArgs) {
     { title: "SweetTrack - Pedido" },
     { name: "description", content: "Pedido - SweetTrack" },
   ];
+}
+
+export function clientLoader() {
+  verifyIfUserIsAuthenticated();
 }
 
 export default function Pedido() {
