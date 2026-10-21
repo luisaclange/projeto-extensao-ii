@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { AppBar } from "~/components/AppBar";
 import { CardNew } from "~/components/CardNew";
-import { CardPedido } from "~/components/CardPedido";
+import { CardPedido } from "./components/CardPedido";
 import { LoaderPage } from "~/components/LoaderPage";
 import api from "~/services/axios";
 import type { ILote } from "~/types/lote.type";

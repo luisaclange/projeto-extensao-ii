@@ -2,6 +2,7 @@ import { Button, Container, IconButton, Menu, MenuItem } from "@mui/material";
 import logo from "../assets/file.svg";
 import { useId, useState } from "react";
 import { Menu as MenuIcon } from "@mui/icons-material";
+import { useNavigate } from "react-router";
 
 export const AppBar = () => {
   const id = useId();
@@ -9,11 +10,24 @@ export const AppBar = () => {
   const menuId = `${id}-menu`;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  const navigate = useNavigate();
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleRedirectHome = () => {
+    navigate(`/`);
+  };
+
+  const handleRedirectUsuarios = () => {
+    navigate(`/usuarios`);
+    handleClose();
   };
 
   return (
@@ -22,7 +36,10 @@ export const AppBar = () => {
         maxWidth="lg"
         className="flex flex-row justify-between items-center"
       >
-        <div className="flex flex-row items-center gap-4">
+        <div
+          className="flex flex-row items-center gap-4"
+          onClick={handleRedirectHome}
+        >
           <img src={logo} width="100px" />
           <b style={{ fontFamily: "Lora" }} className="text-4xl">
             Sweet Track
@@ -50,7 +67,7 @@ export const AppBar = () => {
               },
             }}
           >
-            <MenuItem onClick={handleClose}>
+            <MenuItem onClick={handleRedirectUsuarios}>
               <span className="text-white">Usuários</span>
             </MenuItem>
             <MenuItem onClick={handleClose}>
