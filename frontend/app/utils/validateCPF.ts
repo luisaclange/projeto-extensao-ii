@@ -1,6 +1,8 @@
 const validateCPF = (value: string) => {
   const numeros = value.replace(/\D/g, "");
 
+  if (numeros == "00000000000") return true;
+
   if (numeros.length !== 11) return false;
 
   if (/^(\d)\1{10}$/.test(numeros)) return false;

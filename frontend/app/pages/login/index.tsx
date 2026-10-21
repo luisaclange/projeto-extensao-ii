@@ -4,19 +4,84 @@ import logo from "../../assets/file.svg";
 import { validateCPF } from "~/utils/validateCPF";
 import { Input } from "~/components/Input";
 import { useNavigate } from "react-router";
+import api from "~/services/axios";
+import { AlertMessage, type IAlertMessage } from "~/components/AlertMessage";
+import { isAxiosError } from "axios";
 
 export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState<string>();
   const [password, setPassword] = useState<string>();
+  const [alertMessageContent, setAlertMessageContent] = useState<
+    Omit<IAlertMessage, "setIsOpen">
+  >({
+    isOpen: false,
+    message: "",
+    title: "",
+  });
 
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
       setIsLoading(false);
+      const response = await api.post("/login", {
+        cpf: username?.replace(/\D/g, ""),
+        senha: password,
+      });
+      localStorage.setItem("authToken", response.data.token);
+      localStorage.setItem(
+        "expireSession",
+        new Date().getTime() + response.data.expiresIn,
+      );
+      navigate("/");
     } catch (error) {
-      console.log(error);
+      if (isAxiosError(error)) {
+        if (
+          error.status == 401 &&
+          error.response?.data.message == "Credenciais inválidas."
+        ) {
+          setAlertMessageContent({
+            isOpen: true,
+            variant: "error",
+            title: "Credenciais inválidas",
+            message:
+              "A combinação de CPF e senha informados está incorreta. Verifique e tente novamente!",
+          });
+          return;
+        } else if (
+          error.status == 403 &&
+          error.response?.data.message == "Avaliação pendente"
+        ) {
+          setAlertMessageContent({
+            isOpen: true,
+            variant: "error",
+            title: "Aguardando avaliação",
+            message:
+              "O seu cadastro ainda não foi validado. Aguarde ou contate um administrador do sistema.",
+          });
+          return;
+        } else if (
+          error.status == 403 &&
+          error.response?.data.message == "Usuário recusado"
+        ) {
+          setAlertMessageContent({
+            isOpen: true,
+            variant: "error",
+            title: "Erro ao acessar",
+            message:
+              "Você não tem permissão para logar no sistema. Entre em contato com um administrador do sistema.",
+          });
+          return;
+        }
+      }
+      setAlertMessageContent({
+        isOpen: true,
+        variant: "error",
+        title: "Ocorreu um erro",
+        message:
+          "Estamos passando por instabilidades. Tente novamente mais tarde!",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -51,6 +116,7 @@ export function LoginPage() {
                     value={username}
                     setValue={setUsername}
                     placeholder="000.000.000-00"
+                    mask="cpf"
                     rules={[
                       (value?: string) => !!value || "Campo obrigatório",
                       (value?: string) => validateCPF(value!) || "CPF inválido",
@@ -89,6 +155,23 @@ export function LoginPage() {
           </Card>
         </div>
       </Container>
+
+      <AlertMessage
+        isOpen={alertMessageContent.isOpen}
+        message={alertMessageContent.message}
+        title={alertMessageContent.title}
+        setIsOpen={(value: boolean) =>
+          setAlertMessageContent({
+            ...alertMessageContent,
+            isOpen: value,
+          })
+        }
+        labelLeftButton={alertMessageContent.labelLeftButton}
+        labelRightButton={alertMessageContent.labelRightButton}
+        onClickLeftButton={alertMessageContent.onClickLeftButton}
+        onClickRightButton={alertMessageContent.onClickRightButton}
+        variant={alertMessageContent.variant}
+      />
     </section>
   );
 }

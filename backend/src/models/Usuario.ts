@@ -2,7 +2,6 @@ import { db } from "../firestore";
 
 export enum EStatusUsuario {
   "ativo",
-  "inativo",
   "pendente",
   "recusado",
 }

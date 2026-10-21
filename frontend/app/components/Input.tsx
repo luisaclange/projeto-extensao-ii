@@ -1,6 +1,6 @@
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { IconButton, InputAdornment, TextField } from "@mui/material";
-import { useState } from "react";
+import React, { useState } from "react";
 
 export interface IInput {
   value: string | undefined;
@@ -9,6 +9,7 @@ export interface IInput {
   placeholder?: string;
   rules?: Array<(value?: string) => boolean | string>;
   password?: boolean;
+  mask?: "cpf";
 }
 
 export function Input({
@@ -18,23 +19,37 @@ export function Input({
   placeholder,
   rules = [],
   password = false,
+  mask,
 }: IInput) {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [showPassword, setShowPassword] = useState(!password);
 
+  function maskCPF(value: string): string {
+    return value
+      .replace(/\D/g, "")
+      .slice(0, 11)
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  }
+
+  const onChange = (e: any) => {
+    const newValue = e.target.value;
+
+    setValue(mask === "cpf" ? maskCPF(newValue) : newValue);
+    setErrorMessage(undefined);
+  };
+
   return (
     <div>
       <TextField
-        value={value}
+        value={value || ""}
         label={label}
         placeholder={placeholder}
         className="w-full"
         color="secondary"
         type={showPassword ? "text" : "password"}
-        onChange={(e) => {
-          setValue(e.target.value);
-          setErrorMessage(undefined);
-        }}
+        onChange={onChange}
         onBlur={() => {
           setErrorMessage(undefined);
           for (const item of rules) {

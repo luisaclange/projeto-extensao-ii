@@ -1,11 +1,11 @@
 import { redirect } from "react-router";
 
 const verifyIfUserIsAuthenticated = () => {
-  const authKey = localStorage.getItem("authKey");
+  const authToken = localStorage.getItem("authToken");
   const expireSession = localStorage.getItem("expireSession");
   const now = new Date().getTime();
-  if (!authKey || !expireSession || now >= Number(expireSession)) {
-    localStorage.removeItem("authKey");
+  if (!authToken || !expireSession || now >= Number(expireSession)) {
+    localStorage.removeItem("authToken");
     localStorage.removeItem("expireSession");
     throw redirect("/login");
   }

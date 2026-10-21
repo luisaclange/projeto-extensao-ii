@@ -38,12 +38,6 @@ const authController = {
       }
 
       switch (usuario.status) {
-        case EStatusUsuario.inativo: {
-          res.status(403).json({
-            message: "Usuário inativo",
-          });
-          return;
-        }
         case EStatusUsuario.pendente: {
           res.status(403).json({
             message: "Avaliação pendente",
@@ -74,7 +68,7 @@ const authController = {
       res.status(200).json({
         token,
         tokenType: "Bearer",
-        expiresIn: 900,
+        expiresIn: 3600000,
       });
     } catch (error: unknown) {
       console.error(error);
