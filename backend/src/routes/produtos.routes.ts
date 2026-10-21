@@ -1,12 +1,13 @@
 import { Router } from "express";
 import produtosController from "../controllers/produtos.controller";
+import authenticateToken from "../middlewares/auth.middleware";
 
 const router: Router = Router();
 
-router.post("/", produtosController.create);
-router.get("/", produtosController.getAll);
-router.get("/:id", produtosController.getOne);
-router.put("/:id", produtosController.update);
-router.delete("/:id", produtosController.delete);
+router.post("/", authenticateToken, produtosController.create);
+router.get("/", authenticateToken, produtosController.getAll);
+router.get("/:id", authenticateToken, produtosController.getOne);
+router.put("/:id", authenticateToken, produtosController.update);
+router.delete("/:id", authenticateToken, produtosController.delete);
 
 export default router;

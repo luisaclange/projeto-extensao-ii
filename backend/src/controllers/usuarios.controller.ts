@@ -1,12 +1,26 @@
 import { Request, Response } from "express";
 import { IItem, IPedido, pedidosRef } from "../models/Pedido";
 import { EStatusUsuario, usuariosRef } from "../models/Usuario";
+import bcrypt from "bcrypt";
 
 const usuariosController = {
   async create(req: Request, res: Response): Promise<void> {
     try {
+      const snapshotUsers = await usuariosRef
+        .where("cpf", "==", req.body.cpf)
+        .limit(1)
+        .get();
+
+      if (!snapshotUsers.empty) {
+        res.status(401).json({ error: "Este CPF já está cadastrado." });
+        return;
+      }
+
+      const senhaHashed = bcrypt.hash(req.body.senha, 10);
+
       const newUsuario = await usuariosRef.add({
         ...req.body,
+        senha: senhaHashed,
         status: EStatusUsuario.pendente,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -32,10 +46,14 @@ const usuariosController = {
         return;
       }
 
-      await usuarioRef.update({
-        ...req.body,
-        updatedAt: new Date().toISOString(),
-      });
+      const dataUsuario = { ...req.body, updatedAt: new Date().toISOString() };
+
+      if (dataUsuario.senha) {
+        const senhaHashed = bcrypt.hash(req.body.senha, 10);
+        dataUsuario.senha = senhaHashed;
+      }
+
+      await usuarioRef.update(dataUsuario);
       const updated = await usuarioRef.get();
       res.json({ id: updated.id, ...updated.data() });
     } catch (error: any) {
