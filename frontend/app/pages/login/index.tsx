@@ -5,21 +5,16 @@ import { validateCPF } from "~/utils/validateCPF";
 import { Input } from "~/components/Input";
 import { useNavigate } from "react-router";
 import api from "~/services/axios";
-import { AlertMessage, type IAlertMessage } from "~/components/AlertMessage";
 import { isAxiosError } from "axios";
 import { validateRules } from "~/utils/validateRules";
+import { useAlert } from "~/context/AlertContext";
 
 export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState<string>();
   const [password, setPassword] = useState<string>();
-  const [alertMessageContent, setAlertMessageContent] = useState<
-    Omit<IAlertMessage, "setIsOpen">
-  >({
-    isOpen: false,
-    message: "",
-    title: "",
-  });
+
+  const { showAlert } = useAlert();
 
   const rulesUsername = [
     (value?: string) => !!value || "Campo obrigatório",
@@ -59,8 +54,7 @@ export function LoginPage() {
           error.status == 401 &&
           error.response?.data.message == "Credenciais inválidas."
         ) {
-          setAlertMessageContent({
-            isOpen: true,
+          showAlert({
             variant: "error",
             title: "Credenciais inválidas",
             message:
@@ -71,8 +65,7 @@ export function LoginPage() {
           error.status == 403 &&
           error.response?.data.message == "Avaliação pendente"
         ) {
-          setAlertMessageContent({
-            isOpen: true,
+          showAlert({
             variant: "error",
             title: "Aguardando avaliação",
             message:
@@ -83,8 +76,7 @@ export function LoginPage() {
           error.status == 403 &&
           error.response?.data.message == "Usuário recusado"
         ) {
-          setAlertMessageContent({
-            isOpen: true,
+          showAlert({
             variant: "error",
             title: "Erro ao acessar",
             message:
@@ -93,8 +85,7 @@ export function LoginPage() {
           return;
         }
       }
-      setAlertMessageContent({
-        isOpen: true,
+      showAlert({
         variant: "error",
         title: "Ocorreu um erro",
         message:
@@ -170,23 +161,6 @@ export function LoginPage() {
           </Card>
         </div>
       </Container>
-
-      <AlertMessage
-        isOpen={alertMessageContent.isOpen}
-        message={alertMessageContent.message}
-        title={alertMessageContent.title}
-        setIsOpen={(value: boolean) =>
-          setAlertMessageContent({
-            ...alertMessageContent,
-            isOpen: value,
-          })
-        }
-        labelLeftButton={alertMessageContent.labelLeftButton}
-        labelRightButton={alertMessageContent.labelRightButton}
-        onClickLeftButton={alertMessageContent.onClickLeftButton}
-        onClickRightButton={alertMessageContent.onClickRightButton}
-        variant={alertMessageContent.variant}
-      />
     </section>
   );
 }

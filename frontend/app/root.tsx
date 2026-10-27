@@ -10,7 +10,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { createTheme, ThemeProvider } from "@mui/material";
-import { AppBar } from "./components/AppBar";
+import { AlertProvider } from "./context/AlertContext";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -88,7 +88,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="h-screen">
         <ThemeProvider theme={theme}>
-          <main className="h-full">{children}</main>
+          <AlertProvider>
+            <main className="h-full">{children}</main>
+          </AlertProvider>
         </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
