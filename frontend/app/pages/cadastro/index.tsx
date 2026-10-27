@@ -6,6 +6,8 @@ import { Input } from "~/components/Input";
 import { useNavigate } from "react-router";
 import { validatePassword } from "~/utils/validatePassword";
 import { validateRules } from "~/utils/validateRules";
+import { useAlert } from "~/context/AlertContext";
+import api from "~/services/axios";
 
 export function CadastroPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -17,6 +19,7 @@ export function CadastroPage() {
   }>({});
 
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
 
   const rules = {
     name: [(value?: string) => !!value || "Campo obrigatório"],
@@ -40,13 +43,32 @@ export function CadastroPage() {
     navigate("/login");
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     try {
       setIsLoading(false);
       const isValid = validateRules(form, rules);
       if (!isValid) return;
+      await api.post("/usuarios", {
+        cpf: form.username?.replace(/\D/g, ""),
+        senha: form.password,
+        nome: form.name,
+      });
+      showAlert({
+        variant: "success",
+        title: "Cadastro realizado com sucesso!",
+        message:
+          "Seu cadastro foi realizado com sucesso! Aguarde sua solicitação ser aceita para acessar o sistema.",
+        onClickRightButton: () => {
+          navigate("/login");
+        },
+      });
     } catch (error) {
-      console.log(error);
+      showAlert({
+        variant: "error",
+        title: "Ocorreu um erro",
+        message:
+          "Estamos passando por instabilidades. Tente novamente mais tarde!",
+      });
     } finally {
       setIsLoading(false);
     }

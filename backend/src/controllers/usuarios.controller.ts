@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-import { IItem, IPedido, pedidosRef } from "../models/Pedido";
-import { EStatusUsuario, usuariosRef } from "../models/Usuario";
+import { EStatusUsuario, IUsuario, usuariosRef } from "../models/Usuario";
 import bcrypt from "bcrypt";
 
 const usuariosController = {
@@ -16,9 +15,9 @@ const usuariosController = {
         return;
       }
 
-      const senhaHashed = bcrypt.hash(req.body.senha, 10);
+      const senhaHashed = await bcrypt.hash(req.body.senha, 10);
 
-      const newUsuario = await usuariosRef.add({
+      await usuariosRef.add({
         ...req.body,
         senha: senhaHashed,
         status: EStatusUsuario.pendente,
@@ -26,11 +25,9 @@ const usuariosController = {
         updatedAt: new Date().toISOString(),
       });
 
-      const usuarioRef = usuariosRef.doc(newUsuario.id);
-      const snapshot = await usuarioRef.get();
-
-      const lote = { id: snapshot.id, ...snapshot.data() };
-      res.status(201).json(lote);
+      res.status(201).json({
+        message: "Usuário criado",
+      });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -55,7 +52,9 @@ const usuariosController = {
 
       await usuarioRef.update(dataUsuario);
       const updated = await usuarioRef.get();
-      res.json({ id: updated.id, ...updated.data() });
+      const usuario = updated.data() as IUsuario;
+      const { senha, ...usuarioSemSenha } = usuario;
+      res.json({ id: updated.id, ...usuarioSemSenha });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -81,10 +80,11 @@ const usuariosController = {
   async getAll(req: Request, res: Response): Promise<void> {
     try {
       const snapshot = await usuariosRef.get();
-      const usuarios = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const usuarios = snapshot.docs.map((doc) => {
+        const usuario = doc.data() as IUsuario;
+        const { senha, ...usuarioSemSenha } = usuario;
+        return { id: doc.id, ...usuarioSemSenha };
+      });
 
       res.json(usuarios);
     } catch (error: any) {
@@ -101,12 +101,10 @@ const usuariosController = {
         res.status(404).json({ error: "Usuário não encontrado" });
         return;
       }
-      const usuario = {
-        id: snapshot.id,
-        ...snapshot.data(),
-      };
+      const usuario = snapshot.data() as IUsuario;
+      const { senha, ...usuarioSemSenha } = usuario;
 
-      res.json(usuario);
+      res.json({ id: snapshot.id, ...usuarioSemSenha });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
