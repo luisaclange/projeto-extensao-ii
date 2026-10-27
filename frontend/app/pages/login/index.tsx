@@ -100,21 +100,22 @@ export function LoginPage() {
       <Container maxWidth="lg" className="h-full">
         <div className="flex flex-col items-center justify-center h-full">
           <Card
-            className="h-fit min-h-48 w-full rounded-2xl max-w-xl"
+            className="h-fit w-full rounded-2xl max-w-xl"
+            style={{ minHeight: "550px" }}
             sx={{ borderRadius: "16px" }}
             elevation={0}
           >
-            <CardContent className="p-4 flex flex-col items-center">
+            <CardContent className="p-4 flex flex-col items-center h-full">
               <img src={logo} width="100px" />
               <b style={{ fontFamily: "Lora" }} className="text-4xl text-white">
                 Sweet Track
               </b>
-              <div className="w-full mt-8 flex flex-col gap-8">
+              <div className="w-full mt-8 flex flex-col gap-8 h-full">
                 <p className="text-white text-center">
                   Faça seu login na plataforma!
                 </p>
 
-                <div className="flex flex-col w-full gap-4">
+                <div className="flex flex-col w-full gap-4 h-full">
                   <Input
                     label="CPF"
                     value={form.username}
