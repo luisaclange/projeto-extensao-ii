@@ -58,30 +58,32 @@ export const AlertMessage = ({
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        {onClickLeftButton ? (
+        <div className="w-full flex flex-row justify-between p-2">
+          {onClickLeftButton ? (
+            <Button
+              variant="outlined"
+              onClick={() => {
+                onClickLeftButton();
+                setIsOpen(false);
+              }}
+              autoFocus
+            >
+              <b>{labelLeftButton}</b>
+            </Button>
+          ) : (
+            ""
+          )}
           <Button
             variant="contained"
             onClick={() => {
-              onClickLeftButton();
+              if (onClickRightButton) onClickRightButton();
               setIsOpen(false);
             }}
             autoFocus
           >
-            <b>{labelLeftButton}</b>
+            <b>{labelRightButton || "OK"}</b>
           </Button>
-        ) : (
-          ""
-        )}
-        <Button
-          variant="contained"
-          onClick={() => {
-            if (onClickRightButton) onClickRightButton();
-            setIsOpen(false);
-          }}
-          autoFocus
-        >
-          <b>{labelRightButton || "OK"}</b>
-        </Button>
+        </div>
       </DialogActions>
     </Dialog>
   );
