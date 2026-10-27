@@ -28,9 +28,10 @@ api.interceptors.response.use(
     if (isAxiosError(error)) {
       if (
         error.status == 401 &&
-        error.message == "Token inválido ou expirado."
+        error.response?.data.message == "Token inválido ou expirado."
       ) {
-        redirect("/login");
+        window.location.href = "/login";
+        localStorage.clear();
       }
     }
     return Promise.reject(error);
