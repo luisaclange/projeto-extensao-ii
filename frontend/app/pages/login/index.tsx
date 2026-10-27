@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, Container, TextField } from "@mui/material";
+import { Button, Card, CardContent, Container } from "@mui/material";
 import { useState } from "react";
 import logo from "../../assets/file.svg";
 import { validateCPF } from "~/utils/validateCPF";
@@ -7,6 +7,7 @@ import { useNavigate } from "react-router";
 import api from "~/services/axios";
 import { AlertMessage, type IAlertMessage } from "~/components/AlertMessage";
 import { isAxiosError } from "axios";
+import { validateRules } from "~/utils/validateRules";
 
 export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,11 +21,28 @@ export function LoginPage() {
     title: "",
   });
 
+  const rulesUsername = [
+    (value?: string) => !!value || "Campo obrigatório",
+    (value?: string) => validateCPF(value!) || "CPF inválido",
+  ];
+  const rulesPassword = [(value?: string) => !!value || "Campo obrigatório"];
+
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
       setIsLoading(false);
+      const isValid = validateRules([
+        {
+          rules: rulesUsername,
+          value: username,
+        },
+        {
+          rules: rulesPassword,
+          value: password,
+        },
+      ]);
+      if (!isValid) return;
       const response = await api.post("/login", {
         cpf: username?.replace(/\D/g, ""),
         senha: password,
@@ -117,10 +135,7 @@ export function LoginPage() {
                     setValue={setUsername}
                     placeholder="000.000.000-00"
                     mask="cpf"
-                    rules={[
-                      (value?: string) => !!value || "Campo obrigatório",
-                      (value?: string) => validateCPF(value!) || "CPF inválido",
-                    ]}
+                    rules={rulesUsername}
                   />
 
                   <Input
@@ -128,7 +143,7 @@ export function LoginPage() {
                     value={password}
                     setValue={setPassword}
                     password
-                    rules={[(value?: string) => !!value || "Campo obrigatório"]}
+                    rules={rulesPassword}
                   />
                 </div>
 
