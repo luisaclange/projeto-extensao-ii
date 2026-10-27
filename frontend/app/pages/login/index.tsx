@@ -11,36 +11,31 @@ import { useAlert } from "~/context/AlertContext";
 
 export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState<string>();
-  const [password, setPassword] = useState<string>();
+  const [form, setForm] = useState<{
+    username?: string;
+    password?: string;
+  }>({});
 
   const { showAlert } = useAlert();
 
-  const rulesUsername = [
-    (value?: string) => !!value || "Campo obrigatório",
-    (value?: string) => validateCPF(value!) || "CPF inválido",
-  ];
-  const rulesPassword = [(value?: string) => !!value || "Campo obrigatório"];
+  const rules = {
+    username: [
+      (value?: string) => !!value || "Campo obrigatório",
+      (value?: string) => validateCPF(value!) || "CPF inválido",
+    ],
+    password: [(value?: string) => !!value || "Campo obrigatório"],
+  };
 
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
       setIsLoading(false);
-      const isValid = validateRules([
-        {
-          rules: rulesUsername,
-          value: username,
-        },
-        {
-          rules: rulesPassword,
-          value: password,
-        },
-      ]);
+      const isValid = validateRules(form, rules);
       if (!isValid) return;
       const response = await api.post("/login", {
-        cpf: username?.replace(/\D/g, ""),
-        senha: password,
+        cpf: form.username?.replace(/\D/g, ""),
+        senha: form.password,
       });
       localStorage.setItem("authToken", response.data.token);
       localStorage.setItem(
@@ -122,19 +117,29 @@ export function LoginPage() {
                 <div className="flex flex-col w-full gap-4">
                   <Input
                     label="CPF"
-                    value={username}
-                    setValue={setUsername}
+                    value={form.username}
+                    setValue={(value) =>
+                      setForm({
+                        ...form,
+                        username: value,
+                      })
+                    }
                     placeholder="000.000.000-00"
                     mask="cpf"
-                    rules={rulesUsername}
+                    rules={rules.username}
                   />
 
                   <Input
                     label="Senha"
-                    value={password}
-                    setValue={setPassword}
+                    value={form.password}
+                    setValue={(value) =>
+                      setForm({
+                        ...form,
+                        password: value,
+                      })
+                    }
                     password
-                    rules={rulesPassword}
+                    rules={rules.password}
                   />
                 </div>
 

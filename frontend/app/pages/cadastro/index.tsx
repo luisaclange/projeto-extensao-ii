@@ -5,15 +5,36 @@ import { validateCPF } from "~/utils/validateCPF";
 import { Input } from "~/components/Input";
 import { useNavigate } from "react-router";
 import { validatePassword } from "~/utils/validatePassword";
+import { validateRules } from "~/utils/validateRules";
 
 export function CadastroPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState<string>();
-  const [password, setPassword] = useState<string>();
-  const [passwordComfirm, setPasswordComfirm] = useState<string>();
-  const [name, setName] = useState<string>();
+  const [form, setForm] = useState<{
+    name?: string;
+    username?: string;
+    password?: string;
+    passwordComfirm?: string;
+  }>({});
 
   const navigate = useNavigate();
+
+  const rules = {
+    name: [(value?: string) => !!value || "Campo obrigatório"],
+    username: [
+      (value?: string) => !!value || "Campo obrigatório",
+      (value?: string) => validateCPF(value!) || "CPF inválido",
+    ],
+    password: [
+      (value?: string) => !!value || "Campo obrigatório",
+      (value?: string) =>
+        validatePassword(value!) ||
+        "A senha deve possuir no mínimo 6 dígitos, números e letras",
+    ],
+    passwordComfirm: [
+      (value?: string) => !!value || "Campo obrigatório",
+      (value?: string) => value! == form.password || "As senhas não batem",
+    ],
+  };
 
   const handleLogin = async () => {
     navigate("/login");
@@ -22,6 +43,8 @@ export function CadastroPage() {
   const handleRegister = () => {
     try {
       setIsLoading(false);
+      const isValid = validateRules(form, rules);
+      if (!isValid) return;
     } catch (error) {
       console.log(error);
     } finally {
@@ -51,48 +74,57 @@ export function CadastroPage() {
                 <div className="flex flex-col w-full gap-4">
                   <Input
                     label="Nome"
-                    value={name}
-                    setValue={setName}
+                    value={form.name}
+                    setValue={(value) =>
+                      setForm({
+                        ...form,
+                        name: value,
+                      })
+                    }
                     placeholder="Informe seu nome"
-                    rules={[(value?: string) => !!value || "Campo obrigatório"]}
+                    rules={rules.name}
                   />
 
                   <Input
                     label="CPF"
-                    value={username}
-                    setValue={setUsername}
+                    value={form.username}
+                    setValue={(value) =>
+                      setForm({
+                        ...form,
+                        username: value,
+                      })
+                    }
                     placeholder="000.000.000-00"
-                    rules={[
-                      (value?: string) => !!value || "Campo obrigatório",
-                      (value?: string) => validateCPF(value!) || "CPF inválido",
-                    ]}
+                    mask="cpf"
+                    rules={rules.username}
                   />
 
                   <Input
                     label="Senha"
                     placeholder="Digite sua senha"
-                    value={password}
-                    setValue={setPassword}
+                    value={form.password}
+                    setValue={(value) =>
+                      setForm({
+                        ...form,
+                        password: value,
+                      })
+                    }
                     password
-                    rules={[
-                      (value?: string) => !!value || "Campo obrigatório",
-                      (value?: string) =>
-                        validatePassword(value!) ||
-                        "A senha deve possuir no mínimo 6 dígitos, números e letras",
-                    ]}
+                    rules={rules.password}
                   />
 
                   <Input
                     label="Confirme sua senha"
                     placeholder="Digite sua senha"
-                    value={passwordComfirm}
-                    setValue={setPasswordComfirm}
+                    value={form.passwordComfirm}
+                    setValue={(value) =>
+                      setForm({
+                        ...form,
+                        passwordComfirm: value,
+                      })
+                    }
                     password
-                    rules={[
-                      (value?: string) => !!value || "Campo obrigatório",
-                      (value?: string) =>
-                        value! == password || "As senhas não batem",
-                    ]}
+                    rules={rules.passwordComfirm}
                   />
                 </div>
 

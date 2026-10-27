@@ -1,11 +1,11 @@
-interface Field {
-  value?: string;
-  rules: ((value?: string) => boolean | string)[];
-}
+type Rule = (value?: string) => boolean | string;
 
-const validateRules = (fields: Field[]): boolean => {
-  return fields.every((field) =>
-    field.rules.every((rule) => rule(field.value) === true),
+const validateRules = (
+  fields: Record<string, string | undefined>,
+  rules: Record<string, Rule[]>,
+): boolean => {
+  return Object.keys(fields).every(
+    (key) => rules[key]?.every((rule) => rule(fields[key]) === true) ?? false,
   );
 };
 
