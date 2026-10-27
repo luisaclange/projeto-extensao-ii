@@ -1,17 +1,9 @@
 import {
-  Button,
   Card,
   CardContent,
   Container,
   Grid,
   IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Tooltip,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -152,70 +144,103 @@ export function UsuariosPage() {
               </div>
 
               <div className="flex flex-col gap-4 mt-6">
-                <Grid container spacing={{ xs: 2, md: 4 }} className="mx-4">
-                  <Grid size={{ xs: 12, md: 1 }}>
-                    <b>Status</b>
+                <div className="hidden md:block mx-4">
+                  <Grid container spacing={4}>
+                    <Grid size={1}>
+                      <b>Status</b>
+                    </Grid>
+                    <Grid size={6}>
+                      <b>Nome</b>
+                    </Grid>
+                    <Grid size={3}>
+                      <b>CPF</b>
+                    </Grid>
+                    <Grid size={2}>
+                      <b>Ações</b>
+                    </Grid>
                   </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <b>Nome</b>
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 3 }}>
-                    <b>CPF</b>
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 2 }}>
-                    <b>Ações</b>
-                  </Grid>
-                </Grid>
+                </div>
 
                 {rows.map((row) => (
                   <Card key={row.id}>
                     <CardContent>
-                      <Grid container spacing={{ xs: 2, md: 4 }}>
-                        <Grid size={{ xs: 12, md: 1 }} className="self-center">
-                          <div
-                            className={
-                              (row.status == EStatusUsuario.ativo
-                                ? "text-green-600"
-                                : row.status == EStatusUsuario.recusado
-                                  ? "text-red-500"
-                                  : "text-yellow-300") +
-                              " w-full flex flex-row justify-center"
-                            }
-                          >
-                            <Tooltip title={statusDescription(row.status)}>
-                              {row.status == EStatusUsuario.ativo ? (
-                                <CheckCircle />
-                              ) : row.status == EStatusUsuario.recusado ? (
-                                <Cancel />
-                              ) : (
-                                <RemoveCircle />
-                              )}
-                            </Tooltip>
-                          </div>
-                        </Grid>
+                      <div className="hidden md:block">
+                        <Grid container spacing={4}>
+                          <Grid size={1} className="self-center">
+                            <div
+                              className={
+                                (row.status == EStatusUsuario.ativo
+                                  ? "text-green-600"
+                                  : row.status == EStatusUsuario.recusado
+                                    ? "text-red-500"
+                                    : "text-yellow-300") +
+                                " w-full flex flex-row justify-center"
+                              }
+                            >
+                              <Tooltip title={statusDescription(row.status)}>
+                                {row.status == EStatusUsuario.ativo ? (
+                                  <CheckCircle />
+                                ) : row.status == EStatusUsuario.recusado ? (
+                                  <Cancel />
+                                ) : (
+                                  <RemoveCircle />
+                                )}
+                              </Tooltip>
+                            </div>
+                          </Grid>
 
-                        <Grid
-                          size={{ xs: 12, md: 6 }}
-                          className="text-white self-center"
-                        >
-                          {row.nome}
-                        </Grid>
-                        <Grid
-                          size={{ xs: 12, md: 3 }}
-                          className="text-white self-center"
-                        >
-                          {formatCPF(row.cpf)}
-                        </Grid>
+                          <Grid size={6} className="text-white self-center">
+                            {row.nome}
+                          </Grid>
+                          <Grid size={3} className="text-white self-center">
+                            {formatCPF(row.cpf)}
+                          </Grid>
 
-                        <Grid size={{ xs: 12, md: 2 }}>
+                          <Grid size={2}>
+                            <IconButton>
+                              <Edit className="text-blue-500" />
+                            </IconButton>
+                            <IconButton onClick={() => handleDelete(row)}>
+                              <Delete className="text-red-500" />
+                            </IconButton>
+                          </Grid>
+                        </Grid>
+                      </div>
+                      <div className="flex-row gap-4 flex md:hidden">
+                        <div
+                          className={
+                            (row.status == EStatusUsuario.ativo
+                              ? "text-green-600"
+                              : row.status == EStatusUsuario.recusado
+                                ? "text-red-500"
+                                : "text-yellow-300") +
+                            " w-fit flex flex-row justify-center mt-1"
+                          }
+                        >
+                          {row.status == EStatusUsuario.ativo ? (
+                            <CheckCircle />
+                          ) : row.status == EStatusUsuario.recusado ? (
+                            <Cancel />
+                          ) : (
+                            <RemoveCircle />
+                          )}
+                        </div>
+                        <div className="text-white flex flex-col w-full">
+                          <b className="text-lg">{row.nome}</b>
+                          <span>{formatCPF(row.cpf)}</span>
+                          <span className="mt-1 text-sm">
+                            {statusDescription(row.status)}
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
                           <IconButton>
                             <Edit className="text-blue-500" />
                           </IconButton>
                           <IconButton onClick={() => handleDelete(row)}>
                             <Delete className="text-red-500" />
                           </IconButton>
-                        </Grid>
-                      </Grid>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
