@@ -1,7 +1,13 @@
 import { Button, Container, IconButton, Menu, MenuItem } from "@mui/material";
 import logo from "../assets/file.svg";
 import { useId, useState } from "react";
-import { Menu as MenuIcon } from "@mui/icons-material";
+import {
+  AccountBox,
+  Logout,
+  Menu as MenuIcon,
+  Palette,
+  PeopleAlt,
+} from "@mui/icons-material";
 import { useNavigate } from "react-router";
 
 export const AppBar = () => {
@@ -28,6 +34,11 @@ export const AppBar = () => {
   const handleRedirectUsuarios = () => {
     navigate(`/usuarios`);
     handleClose();
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
   };
 
   return (
@@ -68,13 +79,20 @@ export const AppBar = () => {
             }}
           >
             <MenuItem onClick={handleRedirectUsuarios}>
+              <PeopleAlt className="text-white mr-2" />
               <span className="text-white">Usuários</span>
             </MenuItem>
             <MenuItem onClick={handleClose}>
+              <AccountBox className="text-white mr-2" />
               <span className="text-white">Minha conta</span>
             </MenuItem>
             <MenuItem onClick={handleClose}>
+              <Palette className="text-white mr-2" />
               <span className="text-white">Tema</span>
+            </MenuItem>
+            <MenuItem onClick={handleLogout}>
+              <Logout className="text-red-500 mr-2" />
+              <span className="text-red-500">Sair</span>
             </MenuItem>
           </Menu>
         </div>
