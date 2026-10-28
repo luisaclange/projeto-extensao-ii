@@ -119,7 +119,7 @@ export function LoginPage() {
                   <Input
                     label="CPF"
                     value={form.username}
-                    setValue={(value) =>
+                    setValue={(value?: string) =>
                       setForm({
                         ...form,
                         username: value,
@@ -133,7 +133,7 @@ export function LoginPage() {
                   <Input
                     label="Senha"
                     value={form.password}
-                    setValue={(value) =>
+                    setValue={(value?: string) =>
                       setForm({
                         ...form,
                         password: value,

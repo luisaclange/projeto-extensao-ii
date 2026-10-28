@@ -1,7 +1,7 @@
-type Rule = (value?: string) => boolean | string;
+type Rule = (value?: any) => boolean | string;
 
 const validateRules = (
-  fields: Record<string, string | undefined>,
+  fields: Record<string, string | number | undefined>,
   rules: Record<string, Rule[]>,
 ): boolean => {
   return Object.keys(fields).every(

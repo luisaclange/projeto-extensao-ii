@@ -1,25 +1,32 @@
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { IconButton, InputAdornment, TextField } from "@mui/material";
+import { IconButton, InputAdornment, MenuItem, TextField } from "@mui/material";
 import React, { useState } from "react";
 
 export interface IInput {
-  value: string | undefined;
-  setValue: (value: string | undefined) => void;
+  value: string | number | undefined;
+  setValue: ((value?: string) => void) | ((value?: number) => void);
   label: string;
   placeholder?: string;
-  rules?: Array<(value?: string) => boolean | string>;
+  rules?: Array<(value?: any) => boolean | string>;
   password?: boolean;
   mask?: "cpf";
+  select?: boolean;
+  selectValues?: Array<{
+    label: string;
+    value: string | number;
+  }>;
 }
 
 export function Input({
   setValue,
-  value,
+  value = "",
   label,
   placeholder,
   rules = [],
   password = false,
   mask,
+  select = false,
+  selectValues,
 }: IInput) {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [showPassword, setShowPassword] = useState(!password);
@@ -43,7 +50,8 @@ export function Input({
   return (
     <div>
       <TextField
-        value={value || ""}
+        select={select}
+        value={value}
         label={label}
         placeholder={placeholder}
         className="w-full"
@@ -75,7 +83,14 @@ export function Input({
           },
         }}
         error={!!errorMessage}
-      />
+        InputLabelProps={{ shrink: true }}
+      >
+        {selectValues?.map((item) => (
+          <MenuItem value={item.value}>
+            <span className="text-[#f4f6fc]">{item.label}</span>
+          </MenuItem>
+        ))}
+      </TextField>
       {!!errorMessage ? (
         <div className="mt-1 text-red-500">{errorMessage}</div>
       ) : null}

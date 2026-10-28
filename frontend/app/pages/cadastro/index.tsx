@@ -97,7 +97,7 @@ export function CadastroPage() {
                   <Input
                     label="Nome"
                     value={form.name}
-                    setValue={(value) =>
+                    setValue={(value?: string) =>
                       setForm({
                         ...form,
                         name: value,
@@ -110,7 +110,7 @@ export function CadastroPage() {
                   <Input
                     label="CPF"
                     value={form.username}
-                    setValue={(value) =>
+                    setValue={(value?: string) =>
                       setForm({
                         ...form,
                         username: value,
@@ -125,7 +125,7 @@ export function CadastroPage() {
                     label="Senha"
                     placeholder="Digite sua senha"
                     value={form.password}
-                    setValue={(value) =>
+                    setValue={(value?: string) =>
                       setForm({
                         ...form,
                         password: value,
@@ -139,7 +139,7 @@ export function CadastroPage() {
                     label="Confirme sua senha"
                     placeholder="Digite sua senha"
                     value={form.passwordComfirm}
-                    setValue={(value) =>
+                    setValue={(value?: string) =>
                       setForm({
                         ...form,
                         passwordComfirm: value,

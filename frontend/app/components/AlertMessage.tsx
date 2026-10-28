@@ -71,7 +71,7 @@ export const AlertMessage = ({
               <b>{labelLeftButton}</b>
             </Button>
           ) : (
-            ""
+            <div></div>
           )}
           <Button
             variant="contained"

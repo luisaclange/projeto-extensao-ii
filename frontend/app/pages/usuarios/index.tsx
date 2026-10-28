@@ -1,23 +1,8 @@
-import {
-  Card,
-  CardContent,
-  Container,
-  Grid,
-  IconButton,
-  Tooltip,
-} from "@mui/material";
+import { Container, Grid, IconButton } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { ILote } from "~/types/lote.type";
 import { LoaderPage } from "~/components/LoaderPage";
-import {
-  Cancel,
-  CheckCircle,
-  ChevronLeft,
-  Delete,
-  Edit,
-  RemoveCircle,
-  Search,
-} from "@mui/icons-material";
+import { ChevronLeft, Search } from "@mui/icons-material";
 import { AppBar } from "~/components/AppBar";
 import { useNavigate } from "react-router";
 import { EStatusUsuario, type IUsuario } from "~/types/usuario.type";
@@ -25,6 +10,8 @@ import { formatCPF } from "~/utils/formatCPF";
 import { Input } from "~/components/Input";
 import { useAlert } from "~/context/AlertContext";
 import api from "~/services/axios";
+import { CardUsuario } from "./components/CardUsuario";
+import { DialogEditUsuario } from "./components/DialogEditUsuario";
 
 export interface IResLote extends ILote {
   createdAt?: string | number | Date;
@@ -37,6 +24,8 @@ export function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<Array<IUsuario>>([]);
   const [rows, setRows] = useState<Array<IUsuario>>([]);
   const [filter, setFilter] = useState<string>();
+  const [isOpenDialogEditUsuario, setIsOpenDialogEditUsuario] = useState(false);
+  const [editUsuario, setEditUsuario] = useState<IUsuario>();
 
   const navigate = useNavigate();
   const { showAlert } = useAlert();
@@ -83,6 +72,18 @@ export function UsuariosPage() {
         }
       },
     });
+  };
+
+  const handleEdit = (usuario: IUsuario) => {
+    setEditUsuario(usuario);
+    setIsOpenDialogEditUsuario(true);
+  };
+
+  const updateUsuario = (usuario: IUsuario) => {
+    const filterUsuarios = usuarios.filter((item) => item.id != usuario.id);
+    setUsuarios([...filterUsuarios, usuario]);
+    const filterRows = rows.filter((item) => item.id != usuario.id);
+    setRows([...filterRows, usuario]);
   };
 
   useEffect(() => {
@@ -161,93 +162,29 @@ export function UsuariosPage() {
                   </Grid>
                 </div>
 
-                {rows.map((row) => (
-                  <Card key={row.id}>
-                    <CardContent>
-                      <div className="hidden md:block">
-                        <Grid container spacing={4}>
-                          <Grid size={1} className="self-center">
-                            <div
-                              className={
-                                (row.status == EStatusUsuario.ativo
-                                  ? "text-green-600"
-                                  : row.status == EStatusUsuario.recusado
-                                    ? "text-red-500"
-                                    : "text-yellow-300") +
-                                " w-full flex flex-row justify-center"
-                              }
-                            >
-                              <Tooltip title={statusDescription(row.status)}>
-                                {row.status == EStatusUsuario.ativo ? (
-                                  <CheckCircle />
-                                ) : row.status == EStatusUsuario.recusado ? (
-                                  <Cancel />
-                                ) : (
-                                  <RemoveCircle />
-                                )}
-                              </Tooltip>
-                            </div>
-                          </Grid>
-
-                          <Grid size={6} className="text-white self-center">
-                            {row.nome}
-                          </Grid>
-                          <Grid size={3} className="text-white self-center">
-                            {formatCPF(row.cpf)}
-                          </Grid>
-
-                          <Grid size={2}>
-                            <IconButton>
-                              <Edit className="text-blue-500" />
-                            </IconButton>
-                            <IconButton onClick={() => handleDelete(row)}>
-                              <Delete className="text-red-500" />
-                            </IconButton>
-                          </Grid>
-                        </Grid>
-                      </div>
-                      <div className="flex-row gap-4 flex md:hidden">
-                        <div
-                          className={
-                            (row.status == EStatusUsuario.ativo
-                              ? "text-green-600"
-                              : row.status == EStatusUsuario.recusado
-                                ? "text-red-500"
-                                : "text-yellow-300") +
-                            " w-fit flex flex-row justify-center mt-1"
-                          }
-                        >
-                          {row.status == EStatusUsuario.ativo ? (
-                            <CheckCircle />
-                          ) : row.status == EStatusUsuario.recusado ? (
-                            <Cancel />
-                          ) : (
-                            <RemoveCircle />
-                          )}
-                        </div>
-                        <div className="text-white flex flex-col w-full">
-                          <b className="text-lg">{row.nome}</b>
-                          <span>{formatCPF(row.cpf)}</span>
-                          <span className="mt-1 text-sm">
-                            {statusDescription(row.status)}
-                          </span>
-                        </div>
-                        <div className="flex flex-col">
-                          <IconButton>
-                            <Edit className="text-blue-500" />
-                          </IconButton>
-                          <IconButton onClick={() => handleDelete(row)}>
-                            <Delete className="text-red-500" />
-                          </IconButton>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                {rows
+                  .sort((a, b) => a.nome.localeCompare(b.nome))
+                  .sort((a, b) => a.status - b.status)
+                  .map((row) => (
+                    <CardUsuario
+                      key={row.id}
+                      item={row}
+                      handleDelete={(value) => handleDelete(value)}
+                      statusDescription={(value) => statusDescription(value)}
+                      handleEdit={(value) => handleEdit(value)}
+                    />
+                  ))}
               </div>
             </div>
           </div>
         )}
+
+        <DialogEditUsuario
+          isOpen={isOpenDialogEditUsuario}
+          setIsOpen={setIsOpenDialogEditUsuario}
+          usuario={editUsuario}
+          updateUsuario={updateUsuario}
+        />
       </Container>
     </section>
   );
