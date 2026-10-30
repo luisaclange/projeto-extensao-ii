@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import "dotenv/config";
 
 function authenticateToken(req: Request, res: Response, next: NextFunction) {
@@ -20,9 +20,17 @@ function authenticateToken(req: Request, res: Response, next: NextFunction) {
   }
 
   try {
-    jwt.verify(token, secret, {
+    const decoded = jwt.verify(token, secret, {
       algorithms: ["HS256"],
-    });
+    }) as JwtPayload;
+
+    if (typeof decoded.sub !== "string") {
+      return res.status(401).json({
+        message: "Token inválido.",
+      });
+    }
+
+    res.locals.userId = decoded.sub;
 
     return next();
   } catch (error) {

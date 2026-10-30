@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { EStatusUsuario, usuariosRef } from "../models/Usuario";
+import { EStatusUsuario, IUsuario, usuariosRef } from "../models/Usuario";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import "dotenv/config";
@@ -70,6 +70,34 @@ const authController = {
         tokenType: "Bearer",
         expiresIn: 3600000,
       });
+    } catch (error: unknown) {
+      console.error(error);
+
+      res.status(500).json({
+        message: "Erro interno do servidor.",
+      });
+    }
+  },
+
+  async profile(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = res.locals.userId;
+      if (!userId) {
+        res.status(404).json({ error: "Usuário não encontrado" });
+        return;
+      }
+
+      const usuarioRef = usuariosRef.doc(userId);
+      const snapshot = await usuarioRef.get();
+
+      if (!snapshot.exists) {
+        res.status(404).json({ error: "Usuário não encontrado" });
+        return;
+      }
+      const usuario = snapshot.data() as IUsuario;
+      const { senha, ...usuarioSemSenha } = usuario;
+
+      res.json({ id: snapshot.id, ...usuarioSemSenha });
     } catch (error: unknown) {
       console.error(error);
 

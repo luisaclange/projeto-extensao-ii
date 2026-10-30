@@ -33,7 +33,7 @@ export function LoginPage() {
       setIsLoading(false);
       const isValid = validateRules(form, rules);
       if (!isValid) return;
-      const response = await api.post("/login", {
+      const response = await api.post("/auth/login", {
         cpf: form.username?.replace(/\D/g, ""),
         senha: form.password,
       });

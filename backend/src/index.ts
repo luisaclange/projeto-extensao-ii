@@ -27,7 +27,7 @@ app.use(
 app.use("/api/lotes", lotesRoutes);
 app.use("/api/produtos", produtosRoutes);
 app.use("/api/pedidos", pedidosRoutes);
-app.use("/api/login", authRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 
 const PORT = process.env.PORT || 5000;
