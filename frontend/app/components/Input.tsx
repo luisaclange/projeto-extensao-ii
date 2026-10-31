@@ -109,7 +109,7 @@ export function Input<T extends FieldValues>({
 
           {!!error?.message && (
             <div className="mt-1 text-red-400">
-              <Error className="mr-2" />
+              <Error className="mr-2 -mt-0.5" />
               {error.message}
             </div>
           )}

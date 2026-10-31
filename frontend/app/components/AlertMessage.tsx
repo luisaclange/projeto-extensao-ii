@@ -34,9 +34,13 @@ export const AlertMessage = ({
   return (
     <Dialog
       open={isOpen}
-      onClose={() => setIsOpen(false)}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
+      onClose={(_, reason) => {
+        if (reason === "backdropClick") return;
+        if (reason === "escapeKeyDown") return;
+        setIsOpen(false);
+      }}
     >
       <DialogTitle id="alert-dialog-title">
         {variant == "info" ? (

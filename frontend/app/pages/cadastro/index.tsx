@@ -157,10 +157,14 @@ export function CadastroPage() {
                   </div>
 
                   <div className="w-full flex flex-row gap-4 justify-between">
-                    <Btn variant="secondary" onClick={handleLogin}>
+                    <Btn
+                      className="w-100"
+                      variant="secondary"
+                      onClick={handleLogin}
+                    >
                       Voltar
                     </Btn>
-                    <Btn type="submit" isLoading={isLoading}>
+                    <Btn className="w-100" type="submit" isLoading={isLoading}>
                       Cadastrar
                     </Btn>
                   </div>

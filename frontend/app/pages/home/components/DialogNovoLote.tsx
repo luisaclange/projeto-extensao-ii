@@ -1,16 +1,11 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  TextField,
-} from "@mui/material";
+import { Inventory } from "@mui/icons-material";
+import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { Btn } from "~/components/Btn";
+import { Input } from "~/components/Input";
 import api from "~/services/axios";
-import type { ILote } from "~/types/lote.type";
 
 export function DialogNovoLote({
   isOpen,
@@ -19,20 +14,29 @@ export function DialogNovoLote({
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
-  const [newLote, setNewLote] = useState<Partial<ILote>>();
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string>();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<{
+    titulo: string;
+  }>({
+    mode: "onTouched",
+    defaultValues: {
+      titulo: "",
+    },
+  });
 
   const navigate = useNavigate();
 
-  const handleCreateLote = async () => {
+  const handleCreateLote = async (data: { titulo: string }) => {
     try {
       setIsLoading(true);
-      if (!newLote?.titulo) {
-        setErrorMessage("Campo obrigatório");
-        return;
-      }
-      const response = await api.post("/lotes", newLote);
+      const response = await api.post("/lotes", {
+        titulo: data.titulo,
+      });
       navigate(`/lote?id=${response.data?.id}&edit=true`);
     } catch (error) {
       console.error(error);
@@ -51,40 +55,35 @@ export function DialogNovoLote({
       fullWidth
     >
       <DialogTitle id="alert-dialog-title">
-        <b>Novo lote</b>
+        <Inventory className="mr-2 -mt-1" />
+        <b className="text-2xl">Novo lote</b>
       </DialogTitle>
       <DialogContent>
-        <DialogContentText id="alert-dialog-description" className="py-4">
-          <TextField
-            label="Titulo"
-            value={newLote?.titulo}
-            className="w-full"
-            error={!!errorMessage}
-            onChange={(e) => {
-              setNewLote({ titulo: e.target.value });
-              if (!e.target.value) {
-                setErrorMessage("Campo obrigatório");
-              } else {
-                setErrorMessage(undefined);
-              }
-            }}
-          />
-          {!!errorMessage ? (
-            <div className="mt-1 text-red-500">{errorMessage}</div>
-          ) : null}
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setIsOpen(false)}>Cancelar</Button>
-        <Button
-          loading={isLoading}
-          variant="contained"
-          onClick={handleCreateLote}
-          autoFocus
+        <form
+          onSubmit={handleSubmit(handleCreateLote)}
+          className="h-full flex flex-col gap-8"
         >
-          Criar
-        </Button>
-      </DialogActions>
+          <div className="flex flex-col w-full gap-4 py-2">
+            <Input
+              name="titulo"
+              label="Titulo"
+              control={control}
+              rules={{
+                required: "Campo obrigatório",
+              }}
+            />
+          </div>
+
+          <div className="w-full flex flex-row gap-4 justify-between">
+            <Btn variant="secondary" onClick={() => setIsOpen(false)}>
+              Cancelar
+            </Btn>
+            <Btn isLoading={isLoading} type="submit">
+              Criar
+            </Btn>
+          </div>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 }

@@ -115,10 +115,14 @@ export function LoginPage() {
                   </div>
 
                   <div className="w-full flex flex-row gap-4 justify-between">
-                    <Btn variant="secondary" onClick={handleRegister}>
+                    <Btn
+                      variant="secondary"
+                      className="w-100"
+                      onClick={handleRegister}
+                    >
                       Cadastrar
                     </Btn>
-                    <Btn isLoading={isLoading} type="submit">
+                    <Btn isLoading={isLoading} className="w-100" type="submit">
                       Entrar
                     </Btn>
                   </div>

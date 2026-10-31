@@ -18,11 +18,12 @@ export function Btn({
   return (
     <Button
       {...rest}
-      className="h-full min-h-14 w-100"
+      className={`h-full min-h-14 ${rest.className}`}
       variant={variant == "primary" ? "contained" : "outlined"}
       color="primary"
       disabled={isLoading}
       onClick={onClick}
+      style={{ minWidth: "120px" }}
       sx={{
         "&.Mui-disabled": {
           backgroundColor:
