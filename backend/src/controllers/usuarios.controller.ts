@@ -19,7 +19,7 @@ const usuariosController = {
         .get();
 
       if (!snapshotUsers.empty) {
-        res.status(401).json({ error: "Este CPF já está cadastrado." });
+        res.status(401).json({ message: "Este CPF já está cadastrado." });
         return;
       }
 

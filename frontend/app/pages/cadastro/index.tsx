@@ -1,57 +1,55 @@
-import { Button, Card, CardContent, Container, TextField } from "@mui/material";
+import { Card, CardContent, Container } from "@mui/material";
 import { useState } from "react";
 import logo from "../../assets/file.svg";
 import { validateCPF } from "~/utils/validateCPF";
 import { Input } from "~/components/Input";
 import { useNavigate } from "react-router";
 import { validatePassword } from "~/utils/validatePassword";
-import { validateRules } from "~/utils/validateRules";
 import { useAlert } from "~/context/AlertContext";
 import api from "~/services/axios";
+import { useForm } from "react-hook-form";
+import { Btn } from "~/components/Btn";
+import { defaultErrorMessage } from "~/utils/defaultErrorMessage";
+import { isAxiosError } from "axios";
+
+interface IRegisterForm {
+  name?: string;
+  username?: string;
+  password?: string;
+  passwordComfirm?: string;
+}
 
 export function CadastroPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [form, setForm] = useState<{
-    name?: string;
-    username?: string;
-    password?: string;
-    passwordComfirm?: string;
-  }>({});
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<IRegisterForm>({
+    mode: "onTouched",
+    defaultValues: {
+      username: "",
+      password: "",
+      name: "",
+      passwordComfirm: "",
+    },
+  });
 
   const navigate = useNavigate();
   const { showAlert } = useAlert();
-
-  const rules = {
-    name: [(value?: string) => !!value || "Campo obrigatório"],
-    username: [
-      (value?: string) => !!value || "Campo obrigatório",
-      (value?: string) => validateCPF(value!) || "CPF inválido",
-    ],
-    password: [
-      (value?: string) => !!value || "Campo obrigatório",
-      (value?: string) =>
-        validatePassword(value!) ||
-        "A senha deve possuir no mínimo 6 dígitos, números e letras",
-    ],
-    passwordComfirm: [
-      (value?: string) => !!value || "Campo obrigatório",
-      (value?: string) => value! == form.password || "As senhas não batem",
-    ],
-  };
 
   const handleLogin = async () => {
     navigate("/login");
   };
 
-  const handleRegister = async () => {
+  const handleRegister = async (data: IRegisterForm) => {
     try {
-      setIsLoading(false);
-      const isValid = validateRules(form, rules);
-      if (!isValid) return;
+      setIsLoading(true);
+
       await api.post("/usuarios", {
-        cpf: form.username?.replace(/\D/g, ""),
-        senha: form.password,
-        nome: form.name,
+        cpf: data.username?.replace(/\D/g, ""),
+        senha: data.password,
+        nome: data.name,
       });
       showAlert({
         variant: "success",
@@ -63,12 +61,21 @@ export function CadastroPage() {
         },
       });
     } catch (error) {
-      showAlert({
-        variant: "error",
-        title: "Ocorreu um erro",
-        message:
-          "Estamos passando por instabilidades. Tente novamente mais tarde!",
-      });
+      if (isAxiosError(error)) {
+        if (
+          error.status == 401 &&
+          error.response?.data.message == "Este CPF já está cadastrado."
+        ) {
+          showAlert({
+            variant: "error",
+            title: "CPF já cadastrado",
+            message:
+              "Este CPF já está cadastrado no nosso sistema. Caso não consiga acessar, entre em contato com um administrador.",
+          });
+          return;
+        }
+      }
+      showAlert(defaultErrorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -81,9 +88,10 @@ export function CadastroPage() {
           <Card
             className="h-fit min-h-48 w-full rounded-2xl max-w-xl bg-[#19273170]"
             sx={{ borderRadius: "16px" }}
+            style={{ minHeight: "650px" }}
             elevation={0}
           >
-            <CardContent className="p-4 flex flex-col items-center">
+            <CardContent className="p-4 flex flex-col items-center h-full">
               <img src={logo} width="100px" />
               <b style={{ fontFamily: "Lora" }} className="text-4xl text-white">
                 Sweet Track
@@ -93,81 +101,70 @@ export function CadastroPage() {
                   Faça seu cadastro em nosso sistema!
                 </p>
 
-                <div className="flex flex-col w-full gap-4">
-                  <Input
-                    label="Nome"
-                    value={form.name}
-                    setValue={(value?: string) =>
-                      setForm({
-                        ...form,
-                        name: value,
-                      })
-                    }
-                    placeholder="Informe seu nome"
-                    rules={rules.name}
-                  />
+                <form
+                  onSubmit={handleSubmit(handleRegister)}
+                  className="h-full flex flex-col gap-8"
+                >
+                  <div className="flex flex-col w-full gap-4">
+                    <Input
+                      name="name"
+                      label="Nome"
+                      control={control}
+                      placeholder="Informe seu nome"
+                      rules={{
+                        required: "Campo obrigatório",
+                      }}
+                    />
 
-                  <Input
-                    label="CPF"
-                    value={form.username}
-                    setValue={(value?: string) =>
-                      setForm({
-                        ...form,
-                        username: value,
-                      })
-                    }
-                    placeholder="000.000.000-00"
-                    mask="cpf"
-                    rules={rules.username}
-                  />
+                    <Input
+                      name="username"
+                      label="CPF"
+                      autoComplete="new-password"
+                      control={control}
+                      placeholder="000.000.000-00"
+                      mask="cpf"
+                      rules={{
+                        required: "Campo obrigatório",
+                        validate: (value) =>
+                          validateCPF(value!) || "CPF inválido",
+                      }}
+                    />
 
-                  <Input
-                    label="Senha"
-                    placeholder="Digite sua senha"
-                    value={form.password}
-                    setValue={(value?: string) =>
-                      setForm({
-                        ...form,
-                        password: value,
-                      })
-                    }
-                    password
-                    rules={rules.password}
-                  />
+                    <Input
+                      name="password"
+                      label="Senha"
+                      control={control}
+                      password
+                      autoComplete="new-password"
+                      rules={{
+                        required: "Campo obrigatório",
+                        validate: (value) =>
+                          validatePassword(value!) ||
+                          "A senha deve possuir no mínimo 6 dígitos, números e letras",
+                      }}
+                    />
 
-                  <Input
-                    label="Confirme sua senha"
-                    placeholder="Digite sua senha"
-                    value={form.passwordComfirm}
-                    setValue={(value?: string) =>
-                      setForm({
-                        ...form,
-                        passwordComfirm: value,
-                      })
-                    }
-                    password
-                    rules={rules.passwordComfirm}
-                  />
-                </div>
+                    <Input
+                      name="passwordComfirm"
+                      label="Confirme sua senha"
+                      placeholder="Digite sua senha"
+                      control={control}
+                      password
+                      rules={{
+                        required: "Campo obrigatório",
+                      }}
+                    />
+                  </div>
 
-                <div className="w-full flex flex-row gap-4 justify-between">
-                  <Button
-                    className="h-full min-h-14 w-100"
-                    variant="outlined"
-                    loading={isLoading}
-                    onClick={handleLogin}
-                  >
-                    <b>Voltar</b>
-                  </Button>
-                  <Button
-                    className="h-full min-h-14 w-100"
-                    variant="contained"
-                    loading={isLoading}
-                    onClick={handleRegister}
-                  >
-                    <b>Cadastrar</b>
-                  </Button>
-                </div>
+                  <div className="w-full flex flex-row gap-4 justify-between">
+                    <Btn variant="secondary" onClick={handleLogin}>
+                      Voltar
+                    </Btn>
+                    <Btn type="submit" isLoading={isLoading}>
+                      Cadastrar
+                    </Btn>
+                  </div>
+                </form>
               </div>
             </CardContent>
           </Card>

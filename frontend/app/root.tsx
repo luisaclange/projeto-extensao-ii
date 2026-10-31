@@ -33,7 +33,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     palette: {
       mode: "light",
       primary: {
-        main: "#ff096c",
+        main: "#ff4081",
       },
       secondary: {
         main: "#f4f6fc",
@@ -41,6 +41,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       background: {
         default: "#192731",
         paper: "#192731",
+      },
+      error: {
+        main: "#ef5350",
       },
     },
     components: {

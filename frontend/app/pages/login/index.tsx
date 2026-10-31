@@ -1,12 +1,11 @@
 import { Card, CardContent, Container } from "@mui/material";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import logo from "../../assets/file.svg";
 import { validateCPF } from "~/utils/validateCPF";
 import { Input } from "~/components/Input";
 import { useNavigate } from "react-router";
 import api from "~/services/axios";
 import { isAxiosError } from "axios";
-import { validateRules } from "~/utils/validateRules";
 import { useAlert } from "~/context/AlertContext";
 import { filterErrorLogin } from "./utils/filterErrorLogin";
 import { Btn } from "~/components/Btn";
@@ -90,7 +89,7 @@ export function LoginPage() {
                   onSubmit={handleSubmit(handleLogin)}
                   className="h-full flex flex-col gap-8"
                 >
-                  <div className="flex flex-col w-full gap-4 min-h-48">
+                  <div className="flex flex-col w-full gap-4">
                     <Input
                       name="username"
                       label="CPF"
