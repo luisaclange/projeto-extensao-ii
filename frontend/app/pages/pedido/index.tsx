@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { AppBar } from "~/components/AppBar";
 import { CardNew } from "~/components/CardNew";
+import { FooterApp } from "~/components/FooterApp";
 import { LoaderPage } from "~/components/LoaderPage";
 import api from "~/services/axios";
 import type { IItem } from "~/types/item.type";
@@ -240,7 +241,7 @@ export function PedidoPage() {
                   onClick={handleAddItem}
                 >
                   <CardContent className="flex justify-center items-center h-full p-0">
-                    <span className={`text-4xl text-[#ff096c]`}>+</span>
+                    <span className={`text-4xl text-[#ff4081]`}>+</span>
                   </CardContent>
                 </Card>
               ) : (
@@ -261,6 +262,8 @@ export function PedidoPage() {
           </div>
         )}
       </Container>
+
+      <FooterApp />
 
       <Dialog
         open={isOpenDialog}

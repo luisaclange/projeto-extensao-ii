@@ -1,11 +1,12 @@
 import { Button, CircularProgress, type ButtonProps } from "@mui/material";
 
 export interface IBtn
-  extends Omit<ButtonProps, "variant" | "isLoading" | "onClick"> {
+  extends Omit<ButtonProps, "variant" | "isLoading" | "onClick" | "color"> {
   variant?: "primary" | "secondary";
   children: React.ReactNode;
   isLoading?: boolean;
   onClick?: () => void;
+  color?: "primary" | "error";
 }
 
 export function Btn({
@@ -13,6 +14,7 @@ export function Btn({
   children,
   isLoading = false,
   onClick,
+  color = "primary",
   ...rest
 }: IBtn) {
   return (
@@ -20,7 +22,7 @@ export function Btn({
       {...rest}
       className={`h-full min-h-14 ${rest.className}`}
       variant={variant == "primary" ? "contained" : "outlined"}
-      color="primary"
+      color={color}
       disabled={isLoading}
       onClick={onClick}
       style={{ minWidth: "120px" }}

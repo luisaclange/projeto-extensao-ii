@@ -46,7 +46,10 @@ export const AppBar = () => {
   };
 
   return (
-    <div className="bg-[#19273150] sticky top-0 w-screen backdrop-blur-sm z-50">
+    <div
+      className="bg-[#19273150] sticky top-0 max-w-screen backdrop-blur-sm z-50"
+      style={{ minHeight: "100px" }}
+    >
       <Container
         maxWidth="lg"
         className="flex flex-row justify-between items-center"

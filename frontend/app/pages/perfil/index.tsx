@@ -16,58 +16,61 @@ import api from "~/services/axios";
 import { Input } from "~/components/Input";
 import { validateCPF } from "~/utils/validateCPF";
 import { validatePassword } from "~/utils/validatePassword";
-import { validateRules } from "~/utils/validateRules";
 import type { IUsuario } from "~/types/usuario.type";
 import { formatCPF } from "~/utils/formatCPF";
+import { useForm } from "react-hook-form";
+import { defaultErrorMessage } from "~/utils/defaultErrorMessage";
+import { Btn } from "~/components/Btn";
+import { FooterApp } from "~/components/FooterApp";
 
-export interface IResLote extends ILote {
-  createdAt?: string | number | Date;
-  numeroPedidos?: number;
-  numeroItems?: number;
+interface IProfileForm {
+  name?: string;
+  username?: string;
+  password?: string;
+  passwordConfirm?: string;
 }
 
 export function PerfilPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const [form, setForm] = useState<{
-    name?: string;
-    username?: string;
-    password?: string;
-    passwordComfirm?: string;
-  }>({});
+  const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
+  const [isLoadingDelete, setIsLoadingDelete] = useState(false);
+  const {
+    control,
+    handleSubmit,
+    setValues,
+    getValues,
+    formState: { isSubmitting },
+  } = useForm<IProfileForm>({
+    mode: "onTouched",
+    defaultValues: {
+      username: "",
+      password: "",
+      name: "",
+      passwordConfirm: "",
+    },
+  });
   const [usuario, setUsuario] = useState<IUsuario>();
 
   const navigate = useNavigate();
   const { showAlert } = useAlert();
 
-  const rules = {
-    name: [(value?: string) => !!value || "Campo obrigatório"],
-    username: [
-      (value?: string) => !!value || "Campo obrigatório",
-      (value?: string) => validateCPF(value!) || "CPF inválido",
-    ],
-    password: [
-      (value?: string) =>
-        validatePassword(value!) ||
-        "A senha deve possuir no mínimo 6 dígitos, números e letras",
-    ],
-    passwordComfirm: [
-      (value?: string) => value! == form.password || "As senhas não batem",
-    ],
-  };
-
   const handleBack = () => {
     navigate("/");
   };
 
-  const handleEdit = async () => {
+  const handleEdit = async (data: IProfileForm) => {
     try {
-      setIsLoading(false);
-      const isValid = validateRules(form, rules);
-      if (!isValid) return;
+      setIsLoadingUpdate(false);
       await api.put(`/usuarios/${usuario?.id}`, {
-        cpf: form.username?.replace(/\D/g, ""),
-        senha: form.password,
-        nome: form.name,
+        cpf: data.username?.replace(/\D/g, ""),
+        senha: data.password,
+        nome: data.name,
+      });
+      setValues({
+        name: data.name,
+        username: data.username,
+        password: "",
+        passwordConfirm: "",
       });
       showAlert({
         variant: "success",
@@ -75,22 +78,15 @@ export function PerfilPage() {
         message: "Suas alterações foram salvas no sistema com sucesso!",
       });
     } catch (error) {
-      showAlert({
-        variant: "error",
-        title: "Ocorreu um erro",
-        message:
-          "Estamos passando por instabilidades. Tente novamente mais tarde!",
-      });
+      showAlert(defaultErrorMessage);
     } finally {
-      setIsLoading(false);
+      setIsLoadingUpdate(false);
     }
   };
 
   const deleteAccount = async () => {
     try {
-      setIsLoading(false);
-      const isValid = validateRules(form, rules);
-      if (!isValid) return;
+      setIsLoadingDelete(false);
       await api.delete(`/auth/account`);
       showAlert({
         variant: "success",
@@ -102,14 +98,9 @@ export function PerfilPage() {
         },
       });
     } catch (error) {
-      showAlert({
-        variant: "error",
-        title: "Ocorreu um erro",
-        message:
-          "Estamos passando por instabilidades. Tente novamente mais tarde!",
-      });
+      showAlert(defaultErrorMessage);
     } finally {
-      setIsLoading(false);
+      setIsLoadingDelete(false);
     }
   };
 
@@ -133,7 +124,7 @@ export function PerfilPage() {
       .get("/auth/account")
       .then((data) => {
         setUsuario(data.data);
-        setForm({
+        setValues({
           name: data.data.nome,
           username: formatCPF(data.data.cpf),
         });
@@ -179,83 +170,76 @@ export function PerfilPage() {
                       Certifique-se de que ambas sejam iguais antes de salvar.
                     </p>
 
-                    <div className="flex flex-col w-full gap-4">
-                      <Input
-                        label="Nome"
-                        value={form.name}
-                        setValue={(value?: string) =>
-                          setForm({
-                            ...form,
-                            name: value,
-                          })
-                        }
-                        placeholder="Informe seu nome"
-                        rules={rules.name}
-                      />
+                    <form
+                      onSubmit={handleSubmit(handleEdit)}
+                      className="h-full flex flex-col gap-8"
+                    >
+                      <div className="flex flex-col w-full gap-4">
+                        <Input
+                          name="name"
+                          label="Nome"
+                          control={control}
+                          placeholder="Informe seu nome"
+                          rules={{
+                            required: "Campo obrigatório",
+                          }}
+                        />
 
-                      <Input
-                        label="CPF"
-                        value={form.username}
-                        setValue={(value?: string) =>
-                          setForm({
-                            ...form,
-                            username: value,
-                          })
-                        }
-                        placeholder="000.000.000-00"
-                        mask="cpf"
-                        rules={rules.username}
-                      />
+                        <Input
+                          name="username"
+                          label="CPF"
+                          autoComplete="new-password"
+                          control={control}
+                          placeholder="000.000.000-00"
+                          mask="cpf"
+                          rules={{
+                            required: "Campo obrigatório",
+                            validate: (value) =>
+                              validateCPF(value!) || "CPF inválido",
+                          }}
+                        />
 
-                      <Input
-                        label="Nova senha"
-                        placeholder="Digite sua senha"
-                        value={form.password}
-                        setValue={(value?: string) =>
-                          setForm({
-                            ...form,
-                            password: value,
-                          })
-                        }
-                        password
-                        rules={rules.password}
-                        autoComplete="new-password"
-                      />
+                        <Input
+                          name="password"
+                          label="Nova senha"
+                          control={control}
+                          password
+                          autoComplete="new-password"
+                          rules={{
+                            validate: (value) =>
+                              validatePassword(value!) ||
+                              "A senha deve possuir no mínimo 6 dígitos, números e letras",
+                          }}
+                        />
 
-                      <Input
-                        label="Confirme sua senha"
-                        placeholder="Digite sua senha"
-                        value={form.passwordComfirm}
-                        setValue={(value?: string) =>
-                          setForm({
-                            ...form,
-                            passwordComfirm: value,
-                          })
-                        }
-                        password
-                        rules={rules.passwordComfirm}
-                      />
-                    </div>
+                        <Input
+                          name="passwordConfirm"
+                          label="Confirme sua senha"
+                          placeholder="Digite sua senha"
+                          control={control}
+                          password
+                          rules={{
+                            validate: (value) =>
+                              value == getValues().password ||
+                              "As senhas não batem",
+                          }}
+                        />
+                      </div>
 
-                    <div className="w-full flex flex-row gap-4 justify-between">
-                      <Button
-                        className="h-full min-h-14"
-                        variant="outlined"
-                        color="error"
-                        loading={isLoading}
-                        onClick={handleDeleteAccount}
-                      >
-                        <b>Excluir usuário</b>
-                      </Button>
-                      <Button
-                        className="h-full min-h-14"
-                        variant="contained"
-                        loading={isLoading}
-                        onClick={handleEdit}
-                      >
-                        <b>Salvar alterações</b>
-                      </Button>
-                    </div>
+                      <div className="w-full flex flex-row gap-4 justify-between">
+                        <Btn
+                          variant="secondary"
+                          color="error"
+                          isLoading={isLoadingDelete}
+                          onClick={handleDeleteAccount}
+                        >
+                          Excluir usuário
+                        </Btn>
+                        <Btn isLoading={isLoadingUpdate} type="submit">
+                          Salvar alterações
+                        </Btn>
+                      </div>
+                    </form>
                   </div>
                 </CardContent>
               </Card>
@@ -263,6 +247,8 @@ export function PerfilPage() {
           </div>
         )}
       </Container>
+
+      <FooterApp />
     </section>
   );
 }

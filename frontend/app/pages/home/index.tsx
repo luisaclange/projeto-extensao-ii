@@ -11,6 +11,7 @@ import { CardNew } from "~/components/CardNew";
 import { LoaderPage } from "~/components/LoaderPage";
 import { Inventory, Style } from "@mui/icons-material";
 import { AppBar } from "~/components/AppBar";
+import { FooterApp } from "~/components/FooterApp";
 
 export interface IResLote extends ILote {
   createdAt?: string | number | Date;
@@ -113,6 +114,8 @@ export function HomePage() {
           </div>
         )}
       </Container>
+
+      <FooterApp />
 
       <DialogNovoLote
         isOpen={isOpenDialogNewLote}

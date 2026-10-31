@@ -20,7 +20,7 @@ export function CardNew({
       onClick={handleClick}
     >
       <CardContent className="flex justify-center items-center h-full p-0">
-        <span className={`text-8xl text-[#ff096c]`}>+</span>
+        <span className={`text-8xl text-[#ff4081]`}>+</span>
       </CardContent>
     </Card>
   );

@@ -29,6 +29,7 @@ import type { ILote } from "~/types/lote.type";
 import type { IPedido } from "~/types/pedido.type";
 import type { IProduto } from "~/types/produto.type";
 import { parseDate } from "~/utils/parseDate";
+import { FooterApp } from "~/components/FooterApp";
 
 interface IResLote extends ILote {
   createdAt: Date;
@@ -294,6 +295,8 @@ export function LotePage() {
           </div>
         )}
       </Container>
+
+      <FooterApp />
     </section>
   );
 }

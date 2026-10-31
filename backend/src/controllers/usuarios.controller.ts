@@ -72,7 +72,7 @@ const usuariosController = {
       const dataUsuario = { ...req.body, updatedAt: new Date().toISOString() };
 
       if (dataUsuario.senha) {
-        const senhaHashed = bcrypt.hash(req.body.senha, 10);
+        const senhaHashed = await bcrypt.hash(req.body.senha, 10);
         dataUsuario.senha = senhaHashed;
       }
 

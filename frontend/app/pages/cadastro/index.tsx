@@ -16,7 +16,7 @@ interface IRegisterForm {
   name?: string;
   username?: string;
   password?: string;
-  passwordComfirm?: string;
+  passwordConfirm?: string;
 }
 
 export function CadastroPage() {
@@ -24,6 +24,7 @@ export function CadastroPage() {
   const {
     control,
     handleSubmit,
+    getValues,
     formState: { isSubmitting },
   } = useForm<IRegisterForm>({
     mode: "onTouched",
@@ -31,7 +32,7 @@ export function CadastroPage() {
       username: "",
       password: "",
       name: "",
-      passwordComfirm: "",
+      passwordConfirm: "",
     },
   });
 
@@ -145,13 +146,16 @@ export function CadastroPage() {
                     />
 
                     <Input
-                      name="passwordComfirm"
+                      name="passwordConfirm"
                       label="Confirme sua senha"
                       placeholder="Digite sua senha"
                       control={control}
                       password
                       rules={{
                         required: "Campo obrigatório",
+                        validate: (value) =>
+                          value == getValues().password ||
+                          "As senhas não batem",
                       }}
                     />
                   </div>

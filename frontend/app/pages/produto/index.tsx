@@ -14,6 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { AppBar } from "~/components/AppBar";
+import { FooterApp } from "~/components/FooterApp";
 import { LoaderPage } from "~/components/LoaderPage";
 import api from "~/services/axios";
 import type { IProduto } from "~/types/produto.type";
@@ -78,7 +79,7 @@ export function ProdutoPage() {
   return (
     <section>
       <AppBar />
-      <Container maxWidth="lg" className="mt-4">
+      <Container maxWidth="lg" className="mt-4 h-full">
         {isLoadingPage ? (
           <LoaderPage />
         ) : (
@@ -134,6 +135,8 @@ export function ProdutoPage() {
           </div>
         )}
       </Container>
+
+      <FooterApp />
 
       <Dialog
         open={isOpenDialog}

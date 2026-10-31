@@ -12,6 +12,7 @@ import api from "~/services/axios";
 import { CardUsuario } from "./components/CardUsuario";
 import { DialogEditUsuario } from "./components/DialogEditUsuario";
 import { isAxiosError } from "axios";
+import { FooterApp } from "~/components/FooterApp";
 
 export interface IResLote extends ILote {
   createdAt?: string | number | Date;
@@ -218,14 +219,16 @@ export function UsuariosPage() {
             </div>
           </div>
         )}
-
-        <DialogEditUsuario
-          isOpen={isOpenDialogEditUsuario}
-          setIsOpen={setIsOpenDialogEditUsuario}
-          usuario={editUsuario}
-          updateUsuario={updateUsuario}
-        />
       </Container>
+
+      <FooterApp />
+
+      <DialogEditUsuario
+        isOpen={isOpenDialogEditUsuario}
+        setIsOpen={setIsOpenDialogEditUsuario}
+        usuario={editUsuario}
+        updateUsuario={updateUsuario}
+      />
     </section>
   );
 }

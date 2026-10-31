@@ -16,6 +16,12 @@ html {
   padding: 0 !important;
 }
 
+section {
+  min-height: 100vh;
+  position: relative !important;
+  padding-bottom: 300px;
+}
+
 @layer base {
 
   html,
@@ -25,6 +31,7 @@ html {
     padding: 0;
     width: 100%;
     min-height: 100%;
+    overflow-x: hidden;
   }
 }
 
