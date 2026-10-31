@@ -1,4 +1,4 @@
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Error, Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   IconButton,
   InputAdornment,
@@ -7,14 +7,24 @@ import {
   type TextFieldProps,
 } from "@mui/material";
 import { useState } from "react";
+import {
+  Controller,
+  type Control,
+  type FieldValues,
+  type Path,
+  type RegisterOptions,
+} from "react-hook-form";
 
-export interface IInput
-  extends Omit<TextFieldProps, "value" | "onChange" | "label" | "select"> {
-  value: string | number | undefined;
-  setValue: ((value?: string) => void) | ((value?: number) => void);
+export interface IInput<T extends FieldValues>
+  extends Omit<
+    TextFieldProps,
+    "name" | "value" | "onChange" | "label" | "select"
+  > {
+  name: Path<T>;
+  control: Control<T>;
   label: string;
   placeholder?: string;
-  rules?: Array<(value?: any) => boolean | string>;
+  rules?: RegisterOptions<T, Path<T>>;
   password?: boolean;
   mask?: "cpf";
   select?: boolean;
@@ -24,19 +34,19 @@ export interface IInput
   }>;
 }
 
-export function Input({
-  setValue,
-  value = "",
+export function Input<T extends FieldValues>({
+  name,
+  control,
   label,
   placeholder,
-  rules = [],
+  rules,
   password = false,
   mask,
   select = false,
   selectValues,
+  type,
   ...rest
-}: IInput) {
-  const [errorMessage, setErrorMessage] = useState<string>();
+}: IInput<T>) {
   const [showPassword, setShowPassword] = useState(!password);
 
   function maskCPF(value: string): string {
@@ -48,60 +58,63 @@ export function Input({
       .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
   }
 
-  const onChange = (e: any) => {
-    const newValue = e.target.value;
-
-    setValue(mask === "cpf" ? maskCPF(newValue) : newValue);
-    setErrorMessage(undefined);
-  };
-
   return (
-    <div>
-      <TextField
-        {...rest}
-        select={select}
-        value={value}
-        label={label}
-        placeholder={placeholder}
-        className="w-full"
-        color="secondary"
-        type={showPassword ? "text" : "password"}
-        onChange={onChange}
-        onBlur={() => {
-          setErrorMessage(undefined);
-          for (const item of rules) {
-            if (typeof item(value) == "string") {
-              setErrorMessage(item(value) as string);
-              break;
-            }
-          }
-        }}
-        slotProps={{
-          input: {
-            endAdornment: password ? (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={() => setShowPassword(!showPassword)}
-                  edge="end"
-                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ) : undefined,
-          },
-        }}
-        error={!!errorMessage}
-      >
-        {selectValues?.map((item) => (
-          <MenuItem value={item.value}>
-            <span className="text-[#f4f6fc]">{item.label}</span>
-          </MenuItem>
-        ))}
-      </TextField>
-      {!!errorMessage ? (
-        <div className="mt-1 text-red-500">{errorMessage}</div>
-      ) : null}
-    </div>
+    <Controller
+      name={name}
+      control={control}
+      rules={rules}
+      render={({ field, fieldState: { error } }) => (
+        <div className="w-full">
+          <TextField
+            {...rest}
+            {...field}
+            select={select}
+            label={label}
+            placeholder={placeholder}
+            className="w-full"
+            color="secondary"
+            type={password ? (showPassword ? "text" : "password") : type}
+            value={field.value ?? ""}
+            onChange={(e) => {
+              const newValue = e.target.value;
+
+              field.onChange(mask === "cpf" ? maskCPF(newValue) : newValue);
+            }}
+            slotProps={{
+              input: {
+                endAdornment: password ? (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      aria-label={
+                        showPassword ? "Ocultar senha" : "Mostrar senha"
+                      }
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ) : undefined,
+              },
+            }}
+            error={!!error}
+            onBlur={field.onBlur}
+          >
+            {selectValues?.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                <span className="text-[#f4f6fc]">{item.label}</span>
+              </MenuItem>
+            ))}
+          </TextField>
+
+          {!!error?.message && (
+            <div className="mt-1 text-red-500">
+              <Error className="mr-2" />
+              {error.message}
+            </div>
+          )}
+        </div>
+      )}
+    />
   );
 }

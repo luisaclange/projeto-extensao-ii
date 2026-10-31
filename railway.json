@@ -1,7 +1,0 @@
-{
-  "build": {
-    "rootDir": "backend",
-    "buildCommand": "npm install",
-    "startCommand": "npm start"
-  }
-}
