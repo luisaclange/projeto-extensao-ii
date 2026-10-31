@@ -1,8 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import "dotenv/config";
+import { EStatusUsuario, IUsuario, usuariosRef } from "../models/Usuario";
 
-function authenticateToken(req: Request, res: Response, next: NextFunction) {
+async function authenticateToken(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -26,7 +31,17 @@ function authenticateToken(req: Request, res: Response, next: NextFunction) {
 
     if (typeof decoded.sub !== "string") {
       return res.status(401).json({
-        message: "Token inválido.",
+        message: "Token inválido ou expirado.",
+      });
+    }
+
+    const usuarioRef = usuariosRef.doc(decoded.sub);
+    const snapshot = await usuarioRef.get();
+    const usuario = snapshot.data() as IUsuario;
+
+    if (usuario.status !== EStatusUsuario.ativo) {
+      return res.status(401).json({
+        message: "Token inválido ou expirado.",
       });
     }
 

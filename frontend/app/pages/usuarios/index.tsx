@@ -1,4 +1,4 @@
-import { Container, Grid, IconButton } from "@mui/material";
+import { Container, Grid, IconButton, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { ILote } from "~/types/lote.type";
 import { LoaderPage } from "~/components/LoaderPage";
@@ -7,7 +7,6 @@ import { AppBar } from "~/components/AppBar";
 import { useNavigate } from "react-router";
 import { EStatusUsuario, type IUsuario } from "~/types/usuario.type";
 import { formatCPF } from "~/utils/formatCPF";
-import { Input } from "~/components/Input";
 import { useAlert } from "~/context/AlertContext";
 import api from "~/services/axios";
 import { CardUsuario } from "./components/CardUsuario";
@@ -22,6 +21,7 @@ export interface IResLote extends ILote {
 
 export function UsuariosPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingDelete, setIsLoadingDelete] = useState<string>();
   const [usuarios, setUsuarios] = useState<Array<IUsuario>>([]);
   const [rows, setRows] = useState<Array<IUsuario>>([]);
   const [filter, setFilter] = useState<string>();
@@ -50,10 +50,15 @@ export function UsuariosPage() {
 
   const deleteUsuario = async (user: IUsuario) => {
     try {
-      setIsLoading(true);
+      setIsLoadingDelete(user.id);
       await api.delete(`/usuarios/${user.id}`);
       setUsuarios(usuarios.filter((item) => item.id != user.id));
       setRows(rows.filter((item) => item.id != user.id));
+      showAlert({
+        variant: "success",
+        title: "Usuário deletado com sucesso!",
+        message: `O usuário ${user?.nome} foi excluído com sucesso!`,
+      });
     } catch (error) {
       if (isAxiosError(error)) {
         if (
@@ -89,12 +94,13 @@ export function UsuariosPage() {
           "Estamos passando por instabilidades. Tente novamente mais tarde!",
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingDelete(undefined);
     }
   };
 
   const handleDelete = (user: IUsuario) => {
     showAlert({
+      variant: "warning",
       title: "Deletar usuário",
       message: `Você tem certeza de que deseja deletar o usuário ${user.nome}? Esta ação é irreversível.`,
       labelLeftButton: "Não",
@@ -168,9 +174,10 @@ export function UsuariosPage() {
               <div className="mt-6 flex flex-row w-full items-center gap-4">
                 <Search />
                 <div className="w-full">
-                  <Input
+                  <TextField
+                    className="w-full"
                     label="Busque por um usuário"
-                    setValue={setFilter}
+                    onChange={(value) => setFilter(value.target.value)}
                     value={filter}
                   />
                 </div>
@@ -201,6 +208,7 @@ export function UsuariosPage() {
                     <CardUsuario
                       key={row.id}
                       item={row}
+                      isLoadingDelete={isLoadingDelete == row.id}
                       handleDelete={(value) => handleDelete(value)}
                       statusDescription={(value) => statusDescription(value)}
                       handleEdit={(value) => handleEdit(value)}

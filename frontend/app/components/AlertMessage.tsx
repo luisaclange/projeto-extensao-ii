@@ -1,12 +1,12 @@
 import { CheckCircle, Error, Info } from "@mui/icons-material";
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
+import { Btn } from "./Btn";
 
 export interface IAlertMessage {
   isOpen: boolean;
@@ -44,13 +44,13 @@ export const AlertMessage = ({
     >
       <DialogTitle id="alert-dialog-title">
         {variant == "info" ? (
-          <Info color="info" className="mr-4 -mt-1" />
+          <Info className="mr-4 -mt-1 text-blue-400" />
         ) : variant == "error" ? (
-          <Error color="error" className="mr-4 -mt-1" />
+          <Error className="mr-4 -mt-1 text-red-400" />
         ) : variant == "success" ? (
-          <CheckCircle color="success" className="mr-4 -mt-1" />
+          <CheckCircle className="mr-4 -mt-1 text-green-400" />
         ) : variant == "warning" ? (
-          <Error color="warning" className="mr-4 -mt-1" />
+          <Error className="mr-4 -mt-1 text-yellow-300" />
         ) : (
           ""
         )}
@@ -64,29 +64,28 @@ export const AlertMessage = ({
       <DialogActions>
         <div className="w-full flex flex-row justify-between p-2">
           {onClickLeftButton ? (
-            <Button
-              variant="outlined"
+            <Btn
+              variant="secondary"
               onClick={() => {
                 onClickLeftButton();
                 setIsOpen(false);
               }}
               autoFocus
             >
-              <b>{labelLeftButton}</b>
-            </Button>
+              {labelLeftButton}
+            </Btn>
           ) : (
             <div></div>
           )}
-          <Button
-            variant="contained"
+          <Btn
             onClick={() => {
               if (onClickRightButton) onClickRightButton();
               setIsOpen(false);
             }}
             autoFocus
           >
-            <b>{labelRightButton || "OK"}</b>
-          </Button>
+            {labelRightButton || "OK"}
+          </Btn>
         </div>
       </DialogActions>
     </Dialog>

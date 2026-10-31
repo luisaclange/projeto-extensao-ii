@@ -14,11 +14,13 @@ export function CardUsuario({
   handleDelete,
   statusDescription,
   handleEdit,
+  isLoadingDelete,
 }: {
   item: IUsuario;
   handleDelete: (item: IUsuario) => void;
   statusDescription: (status: EStatusUsuario) => string;
   handleEdit: (item: IUsuario) => void;
+  isLoadingDelete: boolean;
 }) {
   return (
     <Card key={item.id}>
@@ -29,9 +31,9 @@ export function CardUsuario({
               <div
                 className={
                   (item.status == EStatusUsuario.ativo
-                    ? "text-green-600"
+                    ? "text-green-400"
                     : item.status == EStatusUsuario.recusado
-                      ? "text-red-500"
+                      ? "text-red-400"
                       : "text-yellow-300") +
                   " w-full flex flex-row justify-center"
                 }
@@ -57,10 +59,13 @@ export function CardUsuario({
 
             <Grid size={2}>
               <IconButton onClick={() => handleEdit(item)}>
-                <Edit className="text-blue-500" />
+                <Edit className="text-blue-400" />
               </IconButton>
-              <IconButton onClick={() => handleDelete(item)}>
-                <Delete className="text-red-500" />
+              <IconButton
+                loading={isLoadingDelete}
+                onClick={() => handleDelete(item)}
+              >
+                <Delete className="text-red-400" />
               </IconButton>
             </Grid>
           </Grid>
@@ -69,9 +74,9 @@ export function CardUsuario({
           <div
             className={
               (item.status == EStatusUsuario.ativo
-                ? "text-green-600"
+                ? "text-green-400"
                 : item.status == EStatusUsuario.recusado
-                  ? "text-red-500"
+                  ? "text-red-400"
                   : "text-yellow-300") +
               " w-fit flex flex-row justify-center mt-1"
             }
@@ -92,11 +97,14 @@ export function CardUsuario({
             </span>
           </div>
           <div className="flex flex-col">
-            <IconButton>
-              <Edit className="text-blue-500" />
+            <IconButton onClick={() => handleEdit(item)}>
+              <Edit className="text-blue-400" />
             </IconButton>
-            <IconButton onClick={() => handleDelete(item)}>
-              <Delete className="text-red-500" />
+            <IconButton
+              loading={isLoadingDelete}
+              onClick={() => handleDelete(item)}
+            >
+              <Delete className="text-red-400" />
             </IconButton>
           </div>
         </div>

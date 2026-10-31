@@ -5,7 +5,6 @@ import {
   AccountBox,
   Logout,
   Menu as MenuIcon,
-  Palette,
   PeopleAlt,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router";
@@ -91,13 +90,9 @@ export const AppBar = () => {
               <AccountBox className="text-white mr-2" />
               <span className="text-white">Minha conta</span>
             </MenuItem>
-            <MenuItem onClick={handleClose}>
-              <Palette className="text-white mr-2" />
-              <span className="text-white">Tema</span>
-            </MenuItem>
             <MenuItem onClick={handleLogout}>
-              <Logout className="text-red-500 mr-2" />
-              <span className="text-red-500">Sair</span>
+              <Logout className="text-red-400 mr-2" />
+              <span className="text-red-400">Sair</span>
             </MenuItem>
           </Menu>
         </div>

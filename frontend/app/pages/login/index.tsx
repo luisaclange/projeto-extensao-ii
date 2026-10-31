@@ -52,7 +52,7 @@ export function LoginPage() {
       navigate("/");
     } catch (error) {
       if (isAxiosError(error)) {
-        filterErrorLogin(error);
+        showAlert(filterErrorLogin(error));
       } else {
         showAlert(defaultErrorMessage);
       }

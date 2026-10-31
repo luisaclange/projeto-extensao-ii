@@ -1,18 +1,15 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from "@mui/material";
+import { PeopleAlt } from "@mui/icons-material";
+import { Dialog, DialogContent, DialogTitle } from "@mui/material";
+import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Btn } from "~/components/Btn";
 import { Input } from "~/components/Input";
 import { useAlert } from "~/context/AlertContext";
 import api from "~/services/axios";
 import { EStatusUsuario, type IUsuario } from "~/types/usuario.type";
+import { defaultErrorMessage } from "~/utils/defaultErrorMessage";
 import { validateCPF } from "~/utils/validateCPF";
-import { validateRules } from "~/utils/validateRules";
 
 export function DialogEditUsuario({
   isOpen,
@@ -26,53 +23,54 @@ export function DialogEditUsuario({
   updateUsuario: (usuario: IUsuario) => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [editUsuario, setEditUsuario] = useState<Partial<IUsuario>>({});
+  const {
+    control,
+    handleSubmit,
+    setValues,
+    formState: { isSubmitting },
+  } = useForm<Partial<IUsuario>>({
+    mode: "onTouched",
+    defaultValues: {
+      nome: usuario?.nome,
+      cpf: usuario?.cpf,
+      status: usuario?.status,
+    },
+  });
 
   const { showAlert } = useAlert();
 
-  const rules = {
-    nome: [(value?: string) => !!value || "Campo obrigatório"],
-    cpf: [
-      (value?: string) => !!value || "Campo obrigatório",
-      (value?: string) => validateCPF(value!) || "CPF inválido",
-    ],
-    status: [
-      (value?: number) => typeof value == "number" || "Campo obrigatório",
-    ],
-  };
-
-  const handleEditUsuario = async () => {
+  const handleEditUsuario = async (data: Partial<IUsuario>) => {
     try {
       setIsLoading(true);
-      const isValid = validateRules(
-        {
-          nome: editUsuario.nome,
-          cpf: editUsuario.cpf,
-          status: editUsuario.status,
-        },
-        rules,
-      );
-      if (!isValid) return;
       await api.put(`/usuarios/${usuario!.id}`, {
-        nome: editUsuario.nome,
-        cpf: editUsuario.cpf?.replace(/\D/g, ""),
-        status: editUsuario.status,
+        nome: data.nome,
+        cpf: data.cpf?.replace(/\D/g, ""),
+        status: data.status,
       });
-      updateUsuario(editUsuario as IUsuario);
+      updateUsuario(data as IUsuario);
       setIsOpen(false);
       showAlert({
         variant: "success",
         title: "Usuário alterado com sucesso!",
-        message: `As alterações nos dados do usuário ${editUsuario?.nome} foram aplicadas com sucesso!`,
+        message: `As alterações nos dados do usuário ${data?.nome} foram aplicadas com sucesso!`,
       });
     } catch (error) {
-      console.error(error);
-      showAlert({
-        variant: "error",
-        title: "Ocorreu um erro",
-        message:
-          "Estamos passando por instabilidades. Tente novamente mais tarde!",
-      });
+      if (isAxiosError(error)) {
+        if (
+          error.status == 401 &&
+          error.response?.data.message ==
+            "Não é possível desativar o único usuário ativo do sistema."
+        ) {
+          showAlert({
+            variant: "error",
+            title: "Ação inválida",
+            message:
+              "Você não pode trocar o status deste usuário pois é o único usuário ativo do sistema. Certifique-se de que haja um outro usuário ativo e tente novamente.",
+          });
+          return;
+        }
+      }
+      showAlert(defaultErrorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +78,7 @@ export function DialogEditUsuario({
 
   useEffect(() => {
     if (isOpen && usuario) {
-      setEditUsuario(usuario);
+      setValues(usuario);
     }
   }, [isOpen]);
 
@@ -94,70 +92,71 @@ export function DialogEditUsuario({
       fullWidth
     >
       <DialogTitle id="alert-dialog-title">
-        <b>Editar usuário</b>
+        <PeopleAlt className="mr-2 -mt-1" />
+        <b className="text-2xl">Editar usuário</b>
       </DialogTitle>
       <DialogContent id="alert-dialog-description">
-        <div className="py-4 flex flex-col gap-4">
-          <Input
-            label="Nome"
-            placeholder="Nome completo"
-            value={editUsuario.nome}
-            setValue={(value?: string) =>
-              setEditUsuario({ ...editUsuario, nome: value! })
-            }
-            rules={rules.nome}
-          />
-          <Input
-            label="CPF"
-            placeholder="000.000.000-00"
-            value={editUsuario.cpf}
-            setValue={(value?: string) =>
-              setEditUsuario({ ...editUsuario, cpf: value! })
-            }
-            mask="cpf"
-            rules={rules.cpf}
-          />
-          <Input
-            label="Status"
-            placeholder="Selecione"
-            value={editUsuario.status}
-            setValue={(value?: number) =>
-              setEditUsuario({ ...editUsuario, status: value! })
-            }
-            rules={rules.status}
-            select
-            selectValues={[
-              {
-                label: "Ativo",
-                value: EStatusUsuario.ativo,
-              },
-              {
-                label: "Pendente",
-                value: EStatusUsuario.pendente,
-              },
-              {
-                label: "Bloqueado",
-                value: EStatusUsuario.recusado,
-              },
-            ]}
-          />
-        </div>
+        <form
+          onSubmit={handleSubmit(handleEditUsuario)}
+          className="h-full flex flex-col gap-8"
+        >
+          <div className="py-4 flex flex-col gap-4">
+            <Input
+              name="nome"
+              label="Nome"
+              placeholder="Nome completo"
+              control={control}
+              rules={{
+                required: "Campo obrigatório",
+              }}
+            />
+            <Input
+              name="cpf"
+              label="CPF"
+              placeholder="000.000.000-00"
+              control={control}
+              mask="cpf"
+              rules={{
+                required: "Campo obrigatório",
+                validate: (value) =>
+                  validateCPF(value as string) || "CPF inválido",
+              }}
+            />
+            <Input
+              name="status"
+              label="Status"
+              placeholder="Selecione"
+              control={control}
+              rules={{
+                required: "Campo obrigatório",
+              }}
+              select
+              selectValues={[
+                {
+                  label: "Ativo",
+                  value: EStatusUsuario.ativo,
+                },
+                {
+                  label: "Pendente",
+                  value: EStatusUsuario.pendente,
+                },
+                {
+                  label: "Bloqueado",
+                  value: EStatusUsuario.recusado,
+                },
+              ]}
+            />
+          </div>
+          <div className="w-full flex flex-row justify-between">
+            <Btn variant="secondary" onClick={() => setIsOpen(false)}>
+              Cancelar
+            </Btn>
+            <Btn isLoading={isLoading} type="submit" autoFocus>
+              Salvar
+            </Btn>
+          </div>
+        </form>
       </DialogContent>
-      <DialogActions>
-        <div className="w-full flex flex-row justify-between p-2">
-          <Button variant="outlined" onClick={() => setIsOpen(false)}>
-            <b>Cancelar</b>
-          </Button>
-          <Button
-            loading={isLoading}
-            variant="contained"
-            onClick={handleEditUsuario}
-            autoFocus
-          >
-            <b>Salvar</b>
-          </Button>
-        </div>
-      </DialogActions>
     </Dialog>
   );
 }

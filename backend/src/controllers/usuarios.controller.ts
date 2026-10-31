@@ -61,8 +61,9 @@ const usuariosController = {
         const existeOutroAtivo = await existeOutroUsuarioAtivo(req.params.id);
 
         if (!existeOutroAtivo) {
-          res.status(400).json({
-            error: "Não é possível desativar o único usuário ativo do sistema.",
+          res.status(401).json({
+            message:
+              "Não é possível desativar o único usuário ativo do sistema.",
           });
           return;
         }
