@@ -5,6 +5,7 @@ import authenticateToken from "../middlewares/auth.middleware";
 const router: Router = Router();
 
 router.post("/login", authController.login);
-router.get("/profile", authenticateToken, authController.profile);
+router.get("/account", authenticateToken, authController.profile);
+router.delete("/account", authenticateToken, authController.deleteAccount);
 
 export default router;

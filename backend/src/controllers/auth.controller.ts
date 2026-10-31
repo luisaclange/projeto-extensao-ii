@@ -106,6 +106,33 @@ const authController = {
       });
     }
   },
+
+  async deleteAccount(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = res.locals.userId;
+      if (!userId) {
+        res.status(404).json({ error: "Usuário não encontrado" });
+        return;
+      }
+
+      const usuarioRef = usuariosRef.doc(userId);
+      const snapshot = await usuarioRef.get();
+
+      if (!snapshot.exists) {
+        res.status(404).json({ error: "Usuário não encontrado" });
+        return;
+      }
+
+      await usuarioRef.delete();
+      res.json({ message: "Usuário deletado com sucesso" });
+    } catch (error: unknown) {
+      console.error(error);
+
+      res.status(500).json({
+        message: "Erro interno do servidor.",
+      });
+    }
+  },
 };
 
 export default authController;

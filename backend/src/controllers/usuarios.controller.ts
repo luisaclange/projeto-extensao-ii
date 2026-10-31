@@ -2,6 +2,14 @@ import { Request, Response } from "express";
 import { EStatusUsuario, IUsuario, usuariosRef } from "../models/Usuario";
 import bcrypt from "bcrypt";
 
+async function existeOutroUsuarioAtivo(userId: string): Promise<boolean> {
+  const snapshot = await usuariosRef
+    .where("status", "==", EStatusUsuario.ativo)
+    .get();
+
+  return snapshot.docs.some((doc) => doc.id !== userId);
+}
+
 const usuariosController = {
   async create(req: Request, res: Response): Promise<void> {
     try {
@@ -43,6 +51,23 @@ const usuariosController = {
         return;
       }
 
+      const usuarioAtual = snapshot.data() as IUsuario;
+
+      if (
+        usuarioAtual.status === EStatusUsuario.ativo &&
+        req.body.status !== undefined &&
+        req.body.status !== EStatusUsuario.ativo
+      ) {
+        const existeOutroAtivo = await existeOutroUsuarioAtivo(req.params.id);
+
+        if (!existeOutroAtivo) {
+          res.status(400).json({
+            error: "Não é possível desativar o único usuário ativo do sistema.",
+          });
+          return;
+        }
+      }
+
       const dataUsuario = { ...req.body, updatedAt: new Date().toISOString() };
 
       if (dataUsuario.senha) {
@@ -62,12 +87,34 @@ const usuariosController = {
 
   async delete(req: Request, res: Response): Promise<void> {
     try {
+      const userId = res.locals.userId;
+      if (userId == req.params.id) {
+        res.status(401).json({
+          error:
+            "Você não pode excluir seu usuário. Acesse seu perfil para fazer isso.",
+        });
+        return;
+      }
+
       const usuarioRef = usuariosRef.doc(req.params.id);
       const snapshot = await usuarioRef.get();
 
       if (!snapshot.exists) {
         res.status(404).json({ error: "Usuário não encontrado" });
         return;
+      }
+
+      const usuario = snapshot.data() as IUsuario;
+
+      if (usuario.status === EStatusUsuario.ativo) {
+        const existeOutroAtivo = await existeOutroUsuarioAtivo(req.params.id);
+
+        if (!existeOutroAtivo) {
+          res.status(400).json({
+            error: "Não é possível excluir o único usuário ativo do sistema.",
+          });
+          return;
+        }
       }
 
       await usuarioRef.delete();

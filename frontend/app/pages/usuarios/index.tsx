@@ -12,6 +12,7 @@ import { useAlert } from "~/context/AlertContext";
 import api from "~/services/axios";
 import { CardUsuario } from "./components/CardUsuario";
 import { DialogEditUsuario } from "./components/DialogEditUsuario";
+import { isAxiosError } from "axios";
 
 export interface IResLote extends ILote {
   createdAt?: string | number | Date;
@@ -47,6 +48,51 @@ export function UsuariosPage() {
     }
   };
 
+  const deleteUsuario = async (user: IUsuario) => {
+    try {
+      setIsLoading(true);
+      await api.delete(`/usuarios/${user.id}`);
+      setUsuarios(usuarios.filter((item) => item.id != user.id));
+      setRows(rows.filter((item) => item.id != user.id));
+    } catch (error) {
+      if (isAxiosError(error)) {
+        if (
+          error.response?.data.error ==
+          "Você não pode excluir seu usuário. Acesse seu perfil para fazer isso."
+        ) {
+          showAlert({
+            variant: "error",
+            title: "Ocorreu um erro",
+            message:
+              "Você não pode excluir seu próprio usuário! Acesse seu perfil para fazer isso.",
+          });
+          return;
+        }
+
+        if (
+          error.response?.data.error ==
+          "Não é possível excluir o único usuário ativo do sistema."
+        ) {
+          showAlert({
+            variant: "error",
+            title: "Ocorreu um erro",
+            message:
+              "Você não pode excluir este usuário, porque é necessário manter ao menos um usuário ativo no sistema.",
+          });
+          return;
+        }
+      }
+      showAlert({
+        variant: "error",
+        title: "Ocorreu um erro",
+        message:
+          "Estamos passando por instabilidades. Tente novamente mais tarde!",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleDelete = (user: IUsuario) => {
     showAlert({
       title: "Deletar usuário",
@@ -55,21 +101,7 @@ export function UsuariosPage() {
       onClickLeftButton: () => {},
       labelRightButton: "Sim",
       onClickRightButton: async () => {
-        try {
-          setIsLoading(true);
-          api.delete(`/usuarios/${user.id}`);
-          setUsuarios(usuarios.filter((item) => item.id != user.id));
-          setRows(rows.filter((item) => item.id != user.id));
-        } catch (error) {
-          showAlert({
-            variant: "error",
-            title: "Ocorreu um erro",
-            message:
-              "Estamos passando por instabilidades. Tente novamente mais tarde!",
-          });
-        } finally {
-          setIsLoading(false);
-        }
+        deleteUsuario(user);
       },
     });
   };

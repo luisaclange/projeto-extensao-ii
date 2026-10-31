@@ -1,8 +1,15 @@
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { IconButton, InputAdornment, MenuItem, TextField } from "@mui/material";
-import React, { useState } from "react";
+import {
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  TextField,
+  type TextFieldProps,
+} from "@mui/material";
+import { useState } from "react";
 
-export interface IInput {
+export interface IInput
+  extends Omit<TextFieldProps, "value" | "onChange" | "label" | "select"> {
   value: string | number | undefined;
   setValue: ((value?: string) => void) | ((value?: number) => void);
   label: string;
@@ -27,6 +34,7 @@ export function Input({
   mask,
   select = false,
   selectValues,
+  ...rest
 }: IInput) {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [showPassword, setShowPassword] = useState(!password);
@@ -50,6 +58,7 @@ export function Input({
   return (
     <div>
       <TextField
+        {...rest}
         select={select}
         value={value}
         label={label}
@@ -83,7 +92,6 @@ export function Input({
           },
         }}
         error={!!errorMessage}
-        InputLabelProps={{ shrink: true }}
       >
         {selectValues?.map((item) => (
           <MenuItem value={item.value}>

@@ -36,6 +36,11 @@ export const AppBar = () => {
     handleClose();
   };
 
+  const handleRedirectPerfil = () => {
+    navigate("/perfil");
+    handleClose();
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
@@ -82,7 +87,7 @@ export const AppBar = () => {
               <PeopleAlt className="text-white mr-2" />
               <span className="text-white">Usuários</span>
             </MenuItem>
-            <MenuItem onClick={handleClose}>
+            <MenuItem onClick={handleRedirectPerfil}>
               <AccountBox className="text-white mr-2" />
               <span className="text-white">Minha conta</span>
             </MenuItem>
